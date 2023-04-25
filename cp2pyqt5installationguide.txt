@@ -8,6 +8,3 @@ pip install pyqt5-tools
 
 To convert .ui to .py (make sure cmd in the correct folder):
 pyuic5 -x yourform.ui -o file.py
-
-
-test github
