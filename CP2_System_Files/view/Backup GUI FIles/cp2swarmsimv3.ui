@@ -10,6 +10,18 @@
     <height>755</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>1280</width>
+    <height>755</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1280</width>
+    <height>755</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -81,7 +93,7 @@
     <property name="widgetResizable">
      <bool>true</bool>
     </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents_2">
+    <widget class="QWidget" name="scrollAreaWidgetContents">
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -96,7 +108,7 @@
        <height>791</height>
       </size>
      </property>
-     <widget class="QGroupBox" name="parametersGroupBox_2">
+     <widget class="QGroupBox" name="parametersGroupBox">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -119,50 +131,50 @@
       </property>
       <layout class="QFormLayout" name="formLayout_2">
        <item row="0" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_13">
+        <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QLabel" name="agentNumberLabel_3">
+          <widget class="QLabel" name="agentNumberLabel">
            <property name="text">
             <string>Number of agents:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="agentNumberSpinBox_3"/>
+          <widget class="QSpinBox" name="agentNumberSpinBox"/>
          </item>
         </layout>
        </item>
        <item row="1" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_14">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QLabel" name="iterationLabel_3">
+          <widget class="QLabel" name="iterationLabel">
            <property name="text">
             <string>Iterations:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="iterationSpinBox_3"/>
+          <widget class="QSpinBox" name="iterationSpinBox"/>
          </item>
         </layout>
        </item>
        <item row="2" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_15">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QLabel" name="velocityLabel_3">
+          <widget class="QLabel" name="velocityLabel">
            <property name="text">
             <string>Velocity:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QDoubleSpinBox" name="velocityDoubleSpinBox_3"/>
+          <widget class="QDoubleSpinBox" name="velocityDoubleSpinBox"/>
          </item>
         </layout>
        </item>
       </layout>
      </widget>
-     <widget class="QGroupBox" name="mapGroupBox_2">
+     <widget class="QGroupBox" name="mapGroupBox">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -192,18 +204,18 @@
          <height>66</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_10">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QLabel" name="mapLabel_3">
+           <widget class="QLabel" name="mapLabel">
             <property name="text">
              <string>Map:</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="mapComboBox_3">
+           <widget class="QComboBox" name="mapComboBox">
             <item>
              <property name="text">
               <string>Map Design 1</string>
@@ -224,7 +236,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QCheckBox" name="itemCheckBox_3">
+         <widget class="QCheckBox" name="itemCheckBox">
           <property name="text">
            <string>Items</string>
           </property>
@@ -233,7 +245,7 @@
        </layout>
       </widget>
      </widget>
-     <widget class="QGroupBox" name="simulationGoupBox_2">
+     <widget class="QGroupBox" name="simulationGoupBox">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -254,7 +266,7 @@
       <property name="title">
        <string>Simulation</string>
       </property>
-      <widget class="QLabel" name="simulationSpeedLabel_3">
+      <widget class="QLabel" name="simSpeedLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -267,7 +279,7 @@
         <string>Simulation speed:</string>
        </property>
       </widget>
-      <widget class="QLabel" name="videoRecordingLabel_3">
+      <widget class="QLabel" name="videoRecLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -280,7 +292,7 @@
         <string>Video recording:</string>
        </property>
       </widget>
-      <widget class="QSlider" name="simulationSpeedHorizontalSlider_3">
+      <widget class="QSlider" name="simSpeedHoriSlider">
        <property name="geometry">
         <rect>
          <x>80</x>
@@ -293,7 +305,7 @@
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
-      <widget class="QLabel" name="x1Label_3">
+      <widget class="QLabel" name="xFirstLabel">
        <property name="geometry">
         <rect>
          <x>80</x>
@@ -306,7 +318,7 @@
         <string>1x</string>
        </property>
       </widget>
-      <widget class="QLabel" name="x5Label_3">
+      <widget class="QLabel" name="xSecondLabel">
        <property name="geometry">
         <rect>
          <x>160</x>
@@ -319,7 +331,7 @@
         <string>5x</string>
        </property>
       </widget>
-      <widget class="QLabel" name="x10Label_3">
+      <widget class="QLabel" name="xThirdLabel">
        <property name="geometry">
         <rect>
          <x>230</x>
@@ -341,25 +353,25 @@
          <height>96</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_12">
+       <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_16">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
-           <widget class="QPushButton" name="startPushButton_3">
+           <widget class="QPushButton" name="startPushButton">
             <property name="text">
              <string>Start</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="stopPushButton_3">
+           <widget class="QPushButton" name="stopPushButton">
             <property name="text">
              <string>Stop</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="savePushButton_3">
+           <widget class="QPushButton" name="savePushButton">
             <property name="text">
              <string>Save</string>
             </property>
@@ -368,30 +380,30 @@
          </layout>
         </item>
         <item>
-         <widget class="Line" name="horizontalLine_3">
+         <widget class="Line" name="horizontalLine">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="startSimulationPushButton_3">
+         <widget class="QPushButton" name="startSimPushButton">
           <property name="text">
            <string>Start Simulation</string>
           </property>
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_17">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QPushButton" name="loadPushButton_3">
+           <widget class="QPushButton" name="loadPushButton">
             <property name="text">
              <string>Load</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="resetPushButton_3">
+           <widget class="QPushButton" name="resetPushButton">
             <property name="text">
              <string>Reset</string>
             </property>
@@ -402,7 +414,7 @@
        </layout>
       </widget>
      </widget>
-     <widget class="QGroupBox" name="swarmDesignGroupBox_2">
+     <widget class="QGroupBox" name="swarmDesignGroupBox">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -423,7 +435,7 @@
       <property name="title">
        <string>Swarm Design</string>
       </property>
-      <widget class="QFrame" name="dropFrame_3">
+      <widget class="QFrame" name="dropFrame">
        <property name="geometry">
         <rect>
          <x>190</x>
@@ -450,7 +462,7 @@
        <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
-       <widget class="QLabel" name="dropAlgoLabel_3">
+       <widget class="QLabel" name="dropAlgoLabel">
         <property name="geometry">
          <rect>
           <x>0</x>
@@ -473,16 +485,16 @@
          <height>41</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_13">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <widget class="QLabel" name="taskLabel_3">
+         <widget class="QLabel" name="taskLabel">
           <property name="text">
            <string>Task:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="taskComboBox_3">
+         <widget class="QComboBox" name="taskComboBox">
           <item>
            <property name="text">
             <string>Aggregation</string>
@@ -502,7 +514,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QLabel" name="algorithmLabel_3">
+      <widget class="QLabel" name="algorithmLabel">
        <property name="geometry">
         <rect>
          <x>146</x>
@@ -527,7 +539,7 @@
         <string>Algorithm:</string>
        </property>
       </widget>
-      <widget class="QLabel" name="selectedAlgoLabel_3">
+      <widget class="QLabel" name="selectedAlgoLabel">
        <property name="geometry">
         <rect>
          <x>150</x>
@@ -552,7 +564,7 @@
         <string>selectedalgo.py</string>
        </property>
       </widget>
-      <widget class="QToolButton" name="algorithmToolButton_3">
+      <widget class="QToolButton" name="algorithmToolButton">
        <property name="geometry">
         <rect>
          <x>290</x>
@@ -582,6 +594,21 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <tabstops>
+  <tabstop>taskComboBox</tabstop>
+  <tabstop>algorithmToolButton</tabstop>
+  <tabstop>agentNumberSpinBox</tabstop>
+  <tabstop>iterationSpinBox</tabstop>
+  <tabstop>velocityDoubleSpinBox</tabstop>
+  <tabstop>mapComboBox</tabstop>
+  <tabstop>itemCheckBox</tabstop>
+  <tabstop>simSpeedHoriSlider</tabstop>
+  <tabstop>startPushButton</tabstop>
+  <tabstop>stopPushButton</tabstop>
+  <tabstop>savePushButton</tabstop>
+  <tabstop>startSimPushButton</tabstop>
+  <tabstop>loadPushButton</tabstop>
+  <tabstop>resetPushButton</tabstop>
+  <tabstop>scrollArea</tabstop>
   <tabstop>simulationGraphicsView</tabstop>
  </tabstops>
  <resources/>
