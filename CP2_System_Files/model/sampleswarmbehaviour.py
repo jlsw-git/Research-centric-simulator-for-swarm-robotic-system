@@ -3,8 +3,8 @@ import random
 import math
 
 # Define parameters
-num_robots = 10  # Number of robots
-num_iterations = 1000  # Number of iterations
+num_robots = 1  # Number of robots
+num_iterations = 10  # Number of iterations
 max_speed = 5  # Maximum speed of the robots
 max_turn_angle = 30  # Maximum turning angle of the robots
 target_x = 50  # X coordinate of the target location

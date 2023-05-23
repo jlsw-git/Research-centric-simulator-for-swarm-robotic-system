@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="6501f1d7-5536-40a4-9ef1-3d9848cf4a3b" name="Changes" comment="test">
+      <change beforePath="$PROJECT_DIR$/.idea/CP2_System_Files.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CP2_System_Files.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/samplebaseswarmroboticalgorithm.txt" beforeDir="false" afterPath="$PROJECT_DIR$/model/samplebaseswarmroboticalgorithm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/sampleswarmbehaviour.txt" beforeDir="false" afterPath="$PROJECT_DIR$/model/sampleswarmbehaviour.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/view/cp2swarmsimv3.py" beforeDir="false" afterPath="$PROJECT_DIR$/view/cp2swarmsimv3.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -25,19 +32,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/jlsw0/Documents/GitHub/Research-centric-simulator-for-swarm-robotic-system/CP2_System_Files",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\o\Desktop\Capstone Project\Research-centric-simulator-for-swarm-robotic-system\CP2_System_Files\view\Backup GUI FIles" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.sampleswarmbehaviour">
     <configuration name="cp2swarmsimv3" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="CP2_System_Files" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -60,8 +70,30 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="sampleswarmbehaviour" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="CP2_System_Files" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/model" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/model/sampleswarmbehaviour.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.sampleswarmbehaviour" />
         <item itemvalue="Python.cp2swarmsimv3" />
       </list>
     </recent_temporary>

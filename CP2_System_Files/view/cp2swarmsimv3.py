@@ -155,9 +155,11 @@ class Ui_mainWindow(object):
         self.verticalLayout_4.addWidget(self.horizontalLine)
         self.startSimPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
         self.startSimPushButton.setObjectName("startSimPushButton")
+
         ### startSimPushButton Event ###
         self.startSimPushButton.clicked.connect(self.clicked)
         ################################
+
         self.verticalLayout_4.addWidget(self.startSimPushButton)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
