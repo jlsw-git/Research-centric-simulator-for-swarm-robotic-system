@@ -6,7 +6,7 @@ Pyqt5 installation:
 
 pip install pyqt5-tools
 
-4. Install opencv, pyautogui, Pillow
+4. Install opencv, pyautogui, Pillow, matplotlib
 
 To convert .ui to .py (make sure cmd in the correct folder):
 pyuic5 -x yourform.ui -o file.py

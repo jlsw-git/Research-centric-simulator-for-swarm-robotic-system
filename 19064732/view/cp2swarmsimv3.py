@@ -298,6 +298,7 @@ class Ui_mainWindow(object):
         import pyautogui
         import cv2
         import numpy as np
+        import os
 
         # Specify resolution
         resolution = (1920, 1080)
@@ -305,22 +306,34 @@ class Ui_mainWindow(object):
         # Specify video codec
         codec = cv2.VideoWriter_fourcc(*"XVID")
 
-        # Specify name of Output file
-        filename = "Recording.mp4"
+        # # Specify name of output file
+        # filename = "Recording.mp4"
+        # path = "view/" + filename
+        # print(path)
+
+        # Specify valid file name of output file:
+        counter = 0
+        filename = "Recording%s.mp4" % counter
+        filepath = "../view/" + filename
+
+        while os.path.exists(filepath):
+            counter += 1
+            filename = "Recording%s.mp4" % counter
+            filepath = "../view/" + filename
 
         # Specify frame rate
         fps = 20.0
 
-        # Creating a VideoWriter object
+        # Create a VideoWriter object
         out = cv2.VideoWriter(filename, codec, fps, resolution)
 
-        # Create an Empty window
+        # Create an empty window
         cv2.namedWindow("Recording..", cv2.WINDOW_NORMAL)
 
-        # Resize this window
+        # Resize window
         cv2.resizeWindow("Recording..", 300, 200)
 
-        # Move window to a corner
+        # Move window to the top left corner
         cv2.moveWindow("Recording..", 0, 0)
 
         while True:
@@ -339,7 +352,7 @@ class Ui_mainWindow(object):
             # Display the recording screen
             cv2.imshow("Recording..", frame)
 
-            # Stop recording when we press 'q'
+            # Press 'q' to stop recording
             if cv2.waitKey(1) == ord('q'):
                 break
 
@@ -352,7 +365,6 @@ class Ui_mainWindow(object):
     def stopRecord(self):
         hotkey('alt', 'tab')
         press('q')
-
 
 
 if __name__ == "__main__":
