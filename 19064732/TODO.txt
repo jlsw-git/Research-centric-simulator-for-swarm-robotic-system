@@ -1,7 +1,31 @@
-implement:
-swarm algo with visualization
-view system files?
+
+_________________________________
+             TODO
+_________________________________
+- Sim Logic -
+select system file              x
+drag/drop file                  x
+video recording                 x
+
+- Swarm Logic -
+swarm algo
+swarm behaviour
+environment modeling
+robot modeling
+robot-item interaction
+basic visualization
+
+- Sim/Swarm Logic -
+select task combobox
+select map design
+apply parameters
+item option
+sim speed
+timer
+complete visualization
+load saved parameters (?)
+
+- Output Files (Analysis) -
+performance metrics
 log file
 load log file
-performance metrics
-drag/drop file
