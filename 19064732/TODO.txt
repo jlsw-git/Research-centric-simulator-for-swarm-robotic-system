@@ -1,0 +1,7 @@
+implement:
+swarm algo with visualization
+view system files?
+log file
+load log file
+performance metrics
+drag/drop file
