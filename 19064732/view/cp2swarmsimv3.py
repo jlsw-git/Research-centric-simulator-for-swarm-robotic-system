@@ -367,7 +367,7 @@ class Ui_mainWindow(QMainWindow):
         resolution = (width, height)
 
         # Specify video codec
-        codec = cv2.VideoWriter_fourcc(*"XVID")
+        codec = cv2.VideoWriter_fourcc(*"mp4v")
 
         # Create new filename with incrementing number
         counter = 0
