@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView
+from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView, QPushButton
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPainter, QBrush, QColor
 import math
@@ -48,7 +48,7 @@ class PSOVisualizer(QMainWindow):
         self.view.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         self.view.setGeometry(0, 0, 600, 600)
 
-        self.num_particles = 10
+        self.num_particles = 100
         self.target = [300, 300]
         self.particles = []
 
@@ -58,9 +58,12 @@ class PSOVisualizer(QMainWindow):
             particle = Particle(x, y)
             self.particles.append(particle)
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_particles)
-        self.timer.start(50)
+        self.button = QPushButton(self)
+        self.button.clicked.connect(self.update_particles)
+
+        # self.timer = QTimer(self)
+        # self.timer.timeout.connect(self.update_particles)
+        # self.timer.start(50)
 
     def update_particles(self):
         global_best_fitness = float('inf')
