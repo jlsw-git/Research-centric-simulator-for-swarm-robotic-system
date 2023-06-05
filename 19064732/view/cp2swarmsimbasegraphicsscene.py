@@ -19,7 +19,7 @@ from PyQt5.QtGui import QBrush
 from pyautogui import press, hotkey
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QGraphicsScene, QGraphicsView
-import time
+
 
 class Ui_mainWindow(QMainWindow):
     def setupUi(self, mainWindow):
@@ -34,20 +34,19 @@ class Ui_mainWindow(QMainWindow):
         self.centralWidget = QtWidgets.QWidget(mainWindow)
         self.centralWidget.setObjectName("centralWidget")
 
-        ### Running simulation ###
+
         self.scene = QGraphicsScene(self)
         self.simulationGraphicsView = QGraphicsView(self.scene, self)
         self.num_particles = 10
         self.target = [300, 300]
         self.particles = []
+        self.scene.addEllipse(self.target[0] - 10 / 2, self.target[1] - 10 / 2, 10, 10, brush=QBrush(Qt.red))
         self.simulationGraphicsView.setGeometry(QtCore.QRect(370, 10, 901, 721))
         self.simulationGraphicsView.setObjectName("simulationGraphicsView")
-
 
         self.timeLcdNumber = QtWidgets.QLCDNumber(self.centralWidget)
         self.timeLcdNumber.setGeometry(QtCore.QRect(1173, 700, 71, 23))
         self.timeLcdNumber.setObjectName("timeLcdNumber")
-        ###########################################################
 
         self.timeLabel = QtWidgets.QLabel(self.centralWidget)
         self.timeLabel.setGeometry(QtCore.QRect(1110, 700, 71, 16))
@@ -322,7 +321,7 @@ class Ui_mainWindow(QMainWindow):
 
         # startSimPushButton Start Simulation
         """Incomplete"""
-        self.startSimPushButton.clicked.connect(self.startSimulation)
+        self.startSimPushButton.clicked.connect(self.buttonIsClicked)
 
         # algorithmToolButton Select Algorithm from Local Files
         self.algorithmToolButton.clicked.connect(self.selectAlgorithm)
@@ -473,13 +472,6 @@ class Ui_mainWindow(QMainWindow):
         """ Incomplete section
         # Apply selected algorithm into simulation
         """
-
-    def startSimulation(self):
-        self.scene.clear()
-        # time.sleep(1)
-        self.scene.addEllipse(self.target[0] - 10 / 2, self.target[1] - 10 / 2, 10, 10, brush=QBrush(Qt.red))
-
-
 
 
 # Main function
