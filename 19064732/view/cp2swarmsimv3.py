@@ -14,13 +14,13 @@ import os
 import cv2
 import numpy as np
 import pyautogui
-from PyQt5.QtCore import QMimeData, Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QBrush, QColor
 from pyautogui import press, hotkey
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QGraphicsScene, QGraphicsView
 
-from model.psopyqtmodel import Particle
+from model.Particle import Particle
 
 
 class Ui_mainWindow(QMainWindow):
@@ -36,26 +36,14 @@ class Ui_mainWindow(QMainWindow):
         self.centralWidget = QtWidgets.QWidget(mainWindow)
         self.centralWidget.setObjectName("centralWidget")
 
-        ### Running simulation ###
         self.scene = QGraphicsScene(self)
         self.simulationGraphicsView = QGraphicsView(self.scene, self)
         self.simulationGraphicsView.setGeometry(QtCore.QRect(370, 10, 901, 721))
         self.simulationGraphicsView.setObjectName("simulationGraphicsView")
 
-        self.num_particles = 100
-        self.target = [300, 300]
-        self.particles = []
-
-        for _ in range(self.num_particles):
-            x = random.randint(0, 600)
-            y = random.randint(0, 600)
-            particle = Particle(x, y)
-            self.particles.append(particle)
-
         # self.timeLcdNumber = QtWidgets.QLCDNumber(self.centralWidget)
         # self.timeLcdNumber.setGeometry(QtCore.QRect(1173, 700, 71, 23))
         # self.timeLcdNumber.setObjectName("timeLcdNumber")
-        ###########################################################
 
         self.timeLabel = QtWidgets.QLabel(self.centralWidget)
         self.timeLabel.setGeometry(QtCore.QRect(1110, 700, 71, 16))
@@ -99,6 +87,8 @@ class Ui_mainWindow(QMainWindow):
 
         self.agentNumberSpinBox = QtWidgets.QSpinBox(self.parametersGroupBox)
         self.agentNumberSpinBox.setObjectName("agentNumberSpinBox")
+        self.agentNumberSpinBox.setMinimum(10)
+        self.agentNumberSpinBox.setMaximum(1000)
         self.horizontalLayout.addWidget(self.agentNumberSpinBox)
 
         self.formLayout_2.setLayout(0, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout)
@@ -111,6 +101,8 @@ class Ui_mainWindow(QMainWindow):
 
         self.iterationSpinBox = QtWidgets.QSpinBox(self.parametersGroupBox)
         self.iterationSpinBox.setObjectName("iterationSpinBox")
+        self.iterationSpinBox.setMinimum(5)
+        self.iterationSpinBox.setMaximum(1000)
         self.horizontalLayout_2.addWidget(self.iterationSpinBox)
 
         self.formLayout_2.setLayout(1, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_2)
@@ -123,6 +115,8 @@ class Ui_mainWindow(QMainWindow):
 
         self.velocityDoubleSpinBox = QtWidgets.QDoubleSpinBox(self.parametersGroupBox)
         self.velocityDoubleSpinBox.setObjectName("velocityDoubleSpinBox")
+        self.velocityDoubleSpinBox.setMinimum(10)
+        self.velocityDoubleSpinBox.setMaximum(1000)
         self.horizontalLayout_3.addWidget(self.velocityDoubleSpinBox)
 
         self.formLayout_2.setLayout(2, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_3)
@@ -179,6 +173,9 @@ class Ui_mainWindow(QMainWindow):
         self.simSpeedHoriSlider.setGeometry(QtCore.QRect(80, 60, 160, 22))
         self.simSpeedHoriSlider.setOrientation(QtCore.Qt.Horizontal)
         self.simSpeedHoriSlider.setObjectName("simSpeedHoriSlider")
+        self.simSpeedHoriSlider.setMinimum(1)
+        self.simSpeedHoriSlider.setMaximum(500)
+        self.simSpeedHoriSlider.setInvertedAppearance(True)
 
         self.xFirstLabel = QtWidgets.QLabel(self.simulationGroupBox)
         self.xFirstLabel.setGeometry(QtCore.QRect(80, 90, 20, 20))
@@ -482,9 +479,23 @@ class Ui_mainWindow(QMainWindow):
         """
 
     def startSimulation(self):
+        # apply parameter values
+        self.num_particles = self.agentNumberSpinBox.value()
+        self.target = [300, 300]
+        self.particles = []
+
+        for _ in range(self.num_particles):
+            x = random.randint(0, 600)
+            y = random.randint(0, 600)
+            particle = Particle(x, y)
+            self.particles.append(particle)
+
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_particles)
-        self.timer.start(100)
+
+        # Issue here when rerunning start simulation
+        print(self.simSpeedHoriSlider.value())
+        self.timer.start(self.simSpeedHoriSlider.value()) #speed
 
 
     def update_particles(self):
@@ -528,8 +539,6 @@ class Ui_mainWindow(QMainWindow):
     def closeEvent(self, event):
         self.timer.stop()
         event.accept()
-
-
 
 
 # Main function
