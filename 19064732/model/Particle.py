@@ -24,6 +24,7 @@ class Particle:
 
     def evaluate_fitness(self, target):
         distance = math.sqrt((self.position[0] - target[0])**2 + (self.position[1] - target[1])**2)
+
         return distance
 
     def update_best_position(self, fitness):

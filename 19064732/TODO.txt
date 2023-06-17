@@ -20,7 +20,7 @@ select task combobox
 select map design
 apply parameters
 item option
-sim speed
+sim speed                       x
 timer
 complete visualization
 load saved parameters (?)
