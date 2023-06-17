@@ -16,6 +16,8 @@ import os
 import cv2
 import numpy as np
 import pyautogui
+import matplotlib.pyplot as plt
+from datetime import date
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QBrush, QColor
 from pyautogui import press, hotkey
@@ -103,7 +105,7 @@ class Ui_mainWindow(QMainWindow):
 
         self.iterationSpinBox = QtWidgets.QSpinBox(self.parametersGroupBox)
         self.iterationSpinBox.setObjectName("iterationSpinBox")
-        self.iterationSpinBox.setMinimum(5)
+        self.iterationSpinBox.setMinimum(50)
         self.iterationSpinBox.setMaximum(1000)
         self.horizontalLayout_2.addWidget(self.iterationSpinBox)
 
@@ -176,8 +178,8 @@ class Ui_mainWindow(QMainWindow):
         self.simSpeedHoriSlider.setOrientation(QtCore.Qt.Horizontal)
         self.simSpeedHoriSlider.setObjectName("simSpeedHoriSlider")
         self.simSpeedHoriSlider.setMinimum(50)
-        self.simSpeedHoriSlider.setMaximum(300)
-        self.simSpeedHoriSlider.setValue(300)
+        self.simSpeedHoriSlider.setMaximum(250)
+        self.simSpeedHoriSlider.setValue(250)
         self.simSpeedHoriSlider.setInvertedAppearance(True)
 
         self.xFirstLabel = QtWidgets.QLabel(self.simulationGroupBox)
@@ -390,12 +392,14 @@ class Ui_mainWindow(QMainWindow):
 
         # Create new filename with incrementing number
         counter = 0
-        filename = "Recording%s.mp4" % counter
+        current_date = str(date.today())
+        clean_date = current_date.replace("-", "")
+        filename = "VID%s_%s.mp4" % (clean_date, counter)
         filepath = "../recordings/" + filename
 
         while os.path.exists(filepath):
             counter += 1
-            filename = "Recording%s.mp4" % counter
+            filename = "VID%s_%s.mp4" % (clean_date, counter)
             filepath = "../recordings/" + filename
 
         # Specify frame rate
@@ -498,7 +502,8 @@ class Ui_mainWindow(QMainWindow):
         self.current_iteration = 0
         self.target = [300, 300]
         self.particles = []
-        # self.fitness_list = []
+        self.fitness_list = []
+        self.fitness_threshold = 0.005
 
         for _ in range(self.num_particles):
             x = random.randint(0, 600)
@@ -514,14 +519,9 @@ class Ui_mainWindow(QMainWindow):
         self.timer.start(self.simSpeedHoriSlider.value())
 
 
-
     def update_particles(self):
         global_best_fitness = float('inf')
         global_best_position = None
-
-        # self.fitness_list.append(global_best_fitness)
-        # for each in self.fitness_list:
-        #     print(each)
 
         for particle in self.particles:
             fitness = particle.evaluate_fitness(self.target)
@@ -535,13 +535,28 @@ class Ui_mainWindow(QMainWindow):
             particle.move()
 
         self.draw_scene()
-        print(self.timer.remainingTime())
 
-        self.current_iteration += 1
-        if self.current_iteration >= self.num_iterations:
+        self.fitness_list.append(global_best_fitness)
+
+        # check if fitness threshold or max number of iterations is reached
+        if global_best_fitness < self.fitness_threshold or self.current_iteration >= self.num_iterations:
             self.timer.stop()
+            print("Stopped at Fitness:", global_best_fitness)
             print("Stopped at Iteration:", self.current_iteration)
 
+            # plot graphs
+            iteration_list = list(range(0, self.current_iteration+1))
+
+            print("Iterations:", iteration_list)
+            print("Fitness:", self.fitness_list)
+
+            plt.plot(iteration_list, self.fitness_list)
+            plt.xlabel('Iterations')
+            plt.ylabel('Fitness value')
+            plt.title('Swarm Fitness vs. Iteration')
+            plt.show()
+
+        self.current_iteration += 1
 
     def draw_scene(self):
         self.scene.clear()
@@ -549,10 +564,10 @@ class Ui_mainWindow(QMainWindow):
         for particle in self.particles:
             x = particle.position[0]
             y = particle.position[1]
-            size = 10
+            size = 20
 
             # Draw robot as a circle
-            robot_color = QColor(0, 0, 255)  # Blue color
+            robot_color = QColor(Qt.blue)
             robot_brush = QBrush(robot_color)
             self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
 
