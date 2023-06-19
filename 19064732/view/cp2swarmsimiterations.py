@@ -44,17 +44,26 @@ class Ui_mainWindow(QMainWindow):
         self.simulationGraphicsView = QGraphicsView(self.scene, self)
         self.simulationGraphicsView.setGeometry(QtCore.QRect(370, 10, 901, 721))
         self.simulationGraphicsView.setObjectName("simulationGraphicsView")
+        # self.simulationGraphicsView.fitInView(QtCore.QRectF(370, 10, 901, 721), QtCore.Qt.KeepAspectRatio)
+
+        # grid pattern
+        brush = QBrush()
+        brush.setStyle(Qt.CrossPattern)
+        brush.setColor(Qt.lightGray)
+        self.simulationGraphicsView.setBackgroundBrush(brush)
 
         # self.timeLcdNumber = QtWidgets.QLCDNumber(self.centralWidget)
         # self.timeLcdNumber.setGeometry(QtCore.QRect(1173, 700, 71, 23))
         # self.timeLcdNumber.setObjectName("timeLcdNumber")
 
-        self.timeLabel = QtWidgets.QLabel(self.centralWidget)
-        self.timeLabel.setGeometry(QtCore.QRect(1110, 700, 71, 16))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.timeLabel.setFont(font)
-        self.timeLabel.setObjectName("timeLabel")
+
+        ### Change to iteration label ###
+        # self.timeLabel = QtWidgets.QLabel(self.centralWidget)
+        # self.timeLabel.setGeometry(QtCore.QRect(1110, 700, 71, 16))
+        # font = QtGui.QFont()
+        # font.setPointSize(12)
+        # self.timeLabel.setFont(font)
+        # self.timeLabel.setObjectName("timeLabel")
 
         self.layoutWidget = QtWidgets.QWidget(self.centralWidget)
         self.layoutWidget.setGeometry(QtCore.QRect(0, 0, 2, 2))
@@ -91,8 +100,9 @@ class Ui_mainWindow(QMainWindow):
 
         self.agentNumberSpinBox = QtWidgets.QSpinBox(self.parametersGroupBox)
         self.agentNumberSpinBox.setObjectName("agentNumberSpinBox")
-        self.agentNumberSpinBox.setMinimum(10)
+        self.agentNumberSpinBox.setMinimum(1)
         self.agentNumberSpinBox.setMaximum(1000)
+        self.agentNumberSpinBox.setValue(100)
         self.horizontalLayout.addWidget(self.agentNumberSpinBox)
 
         self.formLayout_2.setLayout(0, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout)
@@ -105,8 +115,9 @@ class Ui_mainWindow(QMainWindow):
 
         self.iterationSpinBox = QtWidgets.QSpinBox(self.parametersGroupBox)
         self.iterationSpinBox.setObjectName("iterationSpinBox")
-        self.iterationSpinBox.setMinimum(50)
+        self.iterationSpinBox.setMinimum(1)
         self.iterationSpinBox.setMaximum(1000)
+        self.iterationSpinBox.setValue(100)
         self.horizontalLayout_2.addWidget(self.iterationSpinBox)
 
         self.formLayout_2.setLayout(1, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_2)
@@ -339,11 +350,14 @@ class Ui_mainWindow(QMainWindow):
         # algorithmToolButton - Select Algorithm from Local Files
         self.algorithmToolButton.clicked.connect(self.selectAlgorithm)
 
+        # Testing
+        self.resetPushButton.clicked.connect(self.resetScene)
+
 
     def retranslateUi(self, mainWindow):
         _translate = QtCore.QCoreApplication.translate
         mainWindow.setWindowTitle(_translate("mainWindow", "Swarm Robotics Simulator"))
-        self.timeLabel.setText(_translate("mainWindow", "Time:"))
+        # self.timeLabel.setText(_translate("mainWindow", "Time:"))
         self.parametersGroupBox.setTitle(_translate("mainWindow", "Parameters"))
         self.agentNumberLabel.setText(_translate("mainWindow", "Number of agents:"))
         self.iterationLabel.setText(_translate("mainWindow", "Iterations:"))
@@ -496,6 +510,9 @@ class Ui_mainWindow(QMainWindow):
         """
 
     def startSimulation(self):
+        self.scene.clear()
+        self.startSimPushButton.setDisabled(True)
+
         # apply parameter values
         self.num_particles = self.agentNumberSpinBox.value()
         self.num_iterations = self.iterationSpinBox.value()
@@ -535,12 +552,13 @@ class Ui_mainWindow(QMainWindow):
             particle.move()
 
         self.draw_scene()
-
+        self.simulationGraphicsView.viewport().update()
         self.fitness_list.append(global_best_fitness)
 
         # check if fitness threshold or max number of iterations is reached
         if global_best_fitness < self.fitness_threshold or self.current_iteration >= self.num_iterations:
             self.timer.stop()
+            self.startSimPushButton.setDisabled(False)
             print("Stopped at Fitness:", global_best_fitness)
             print("Stopped at Iteration:", self.current_iteration)
 
@@ -560,6 +578,7 @@ class Ui_mainWindow(QMainWindow):
 
     def draw_scene(self):
         self.scene.clear()
+        self.simulationGraphicsView.viewport().update()
 
         for particle in self.particles:
             x = particle.position[0]
@@ -576,6 +595,12 @@ class Ui_mainWindow(QMainWindow):
         self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
 
         # self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode(1))
+
+    def resetScene(self):
+        self.scene.clear()
+        self.simulationGraphicsView.update()
+        self.simulationGraphicsView.viewport().update()
+        # self.startSimPushButton.setDisabled(False)
 
 
     # def closeEvent(self, event):
