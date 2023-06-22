@@ -219,6 +219,7 @@ class Ui_mainWindow(QMainWindow):
 
         self.stopPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
         self.stopPushButton.setObjectName("stopPushButton")
+        self.stopPushButton.setDisabled(True)
         self.horizontalLayout_4.addWidget(self.startPushButton)
         self.horizontalLayout_4.addWidget(self.stopPushButton)
 
@@ -338,9 +339,6 @@ class Ui_mainWindow(QMainWindow):
         # startPushButton - Start Video Recording
         self.startPushButton.clicked.connect(self.startRecord)
 
-        # stopPushButton - Stop Video Recording
-        self.stopPushButton.clicked.connect(self.stopRecord)
-
         # viewRecPushButton - View Video Recording
         self.viewRecPushButton.clicked.connect(self.viewRecording)
 
@@ -397,6 +395,10 @@ class Ui_mainWindow(QMainWindow):
 
     # To start recording of current screen
     def startRecord(self):
+
+        self.startPushButton.setDisabled(True)
+        self.stopPushButton.setDisabled(False)
+
         # Specify resolution of video
         width, height = pyautogui.size()
         res = (width, height)
@@ -447,9 +449,12 @@ class Ui_mainWindow(QMainWindow):
             # Display recording screen
             cv2.imshow("Recording..", frame)
 
-            # Input keystroke 'q' to stop recording
-            if cv2.waitKey(1) == ord('q'):
+            # Wait for keystroke 'q' or stopPushButton to be clicked
+            if cv2.waitKey(1) == ord('q') or self.stopPushButton.isDown():
+                self.startPushButton.setDisabled(False)
+                self.stopPushButton.setDisabled(True)
                 break
+
 
         # Release VideoWriter
         out.release()
@@ -457,11 +462,6 @@ class Ui_mainWindow(QMainWindow):
         # Close all windows
         cv2.destroyAllWindows()
 
-    # To stop recording
-    def stopRecord(self):
-        # Switch to "Recording..." window and input keystroke 'q' to stop recording
-        hotkey('alt', 'tab')
-        press('q')
 
     def viewRecording(self):
         path, ftype = QFileDialog.getOpenFileName(None, "View Video Recording", "../recordings/", "Video Files (*.mp4)")
