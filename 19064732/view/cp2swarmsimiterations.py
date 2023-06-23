@@ -19,10 +19,10 @@ import pyautogui
 import matplotlib.pyplot as plt
 from datetime import date
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QBrush, QColor
+from PyQt5.QtGui import QBrush, QColor, QFont
 from pyautogui import press, hotkey
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QGraphicsScene, QGraphicsView
+from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QGraphicsScene, QGraphicsView, QGraphicsTextItem
 
 from model.Particle import Particle
 
@@ -46,7 +46,7 @@ class Ui_mainWindow(QMainWindow):
         self.simulationGraphicsView.setObjectName("simulationGraphicsView")
         # self.simulationGraphicsView.fitInView(QtCore.QRectF(370, 10, 901, 721), QtCore.Qt.KeepAspectRatio)
 
-        # grid pattern
+        # Implement grid pattern
         brush = QBrush()
         brush.setStyle(Qt.CrossPattern)
         brush.setColor(Qt.lightGray)
@@ -555,14 +555,14 @@ class Ui_mainWindow(QMainWindow):
         self.simulationGraphicsView.viewport().update()
         self.fitness_list.append(global_best_fitness)
 
-        # check if fitness threshold or max number of iterations is reached
+        # Stop if fitness threshold or max number of iterations is reached
         if global_best_fitness < self.fitness_threshold or self.current_iteration >= self.num_iterations:
             self.timer.stop()
             self.startSimPushButton.setDisabled(False)
             print("Stopped at Fitness:", global_best_fitness)
             print("Stopped at Iteration:", self.current_iteration)
 
-            # plot graphs
+            # Plot graphs
             iteration_list = list(range(0, self.current_iteration+1))
 
             print("Iterations:", iteration_list)
@@ -573,6 +573,13 @@ class Ui_mainWindow(QMainWindow):
             plt.ylabel('Fitness value')
             plt.title('Swarm Fitness vs. Iteration')
             plt.show()
+
+        # Display current iteration
+        iterationText = self.scene.addText("Iteration: %s" % str(self.current_iteration))
+        font = QFont()
+        font.setPointSize(20)
+        iterationText.setFont(font)
+        iterationText.setPos(0, 0)
 
         self.current_iteration += 1
 
@@ -585,7 +592,7 @@ class Ui_mainWindow(QMainWindow):
             y = particle.position[1]
             size = 20
 
-            # Draw robot as a circle
+            # Draw robot as a blue circle
             robot_color = QColor(Qt.blue)
             robot_brush = QBrush(robot_color)
             self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
@@ -615,7 +622,6 @@ def main():
     mainWindow.setupUi(mainWindow)
     mainWindow.show()
     sys.exit(app.exec_())
-
 
 
 if __name__ == "__main__":
