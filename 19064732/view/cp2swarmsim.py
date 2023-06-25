@@ -44,6 +44,8 @@ class Ui_mainWindow(QMainWindow):
         self.simulationGraphicsView = QGraphicsView(self.scene, self)
         self.simulationGraphicsView.setGeometry(QtCore.QRect(370, 10, 901, 721))
         self.simulationGraphicsView.setObjectName("simulationGraphicsView")
+        self.simulationGraphicsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.simulationGraphicsView.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         # self.simulationGraphicsView.fitInView(QtCore.QRectF(370, 10, 901, 721), QtCore.Qt.KeepAspectRatio)
 
         # Implement grid pattern
@@ -565,6 +567,7 @@ class Ui_mainWindow(QMainWindow):
             # Plot graphs
             iteration_list = list(range(0, self.current_iteration+1))
 
+            print("Number of Agents:", self.num_iterations)
             print("Iterations:", iteration_list)
             print("Fitness:", self.fitness_list)
 
@@ -590,7 +593,7 @@ class Ui_mainWindow(QMainWindow):
         for particle in self.particles:
             x = particle.position[0]
             y = particle.position[1]
-            size = 20
+            size = 15
 
             # Draw robot as a blue circle
             robot_color = QColor(Qt.blue)
@@ -607,6 +610,7 @@ class Ui_mainWindow(QMainWindow):
         self.scene.clear()
         self.simulationGraphicsView.update()
         self.simulationGraphicsView.viewport().update()
+        plt.close()
         # self.startSimPushButton.setDisabled(False)
 
 
