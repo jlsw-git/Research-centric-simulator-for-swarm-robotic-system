@@ -350,8 +350,12 @@ class Ui_mainWindow(QMainWindow):
         # algorithmToolButton - Select Algorithm from Local Files
         self.algorithmToolButton.clicked.connect(self.selectAlgorithm)
 
-        # Testing
+        # Testing reset
         self.resetPushButton.clicked.connect(self.resetScene)
+
+        # Testing load
+        self.loadPushButton.clicked.connect(self.displayPosition)
+
 
 
     def retranslateUi(self, mainWindow):
@@ -515,14 +519,21 @@ class Ui_mainWindow(QMainWindow):
         self.scene.clear()
         self.startSimPushButton.setDisabled(True)
 
-        # apply parameter values
+        # Apply parameter values
         self.num_particles = self.agentNumberSpinBox.value()
         self.num_iterations = self.iterationSpinBox.value()
+
+        # For debugging
+        # self.num_particles = 5
+        # self.num_iterations = 0
+
         self.current_iteration = 0
         self.target = [300, 300]
         self.particles = []
         self.fitness_list = []
         self.fitness_threshold = 0.005
+
+        self.pos_list = []
 
         for _ in range(self.num_particles):
             x = random.randint(0, 600)
@@ -553,6 +564,7 @@ class Ui_mainWindow(QMainWindow):
             particle.update_velocity(global_best_position, 0.7, 1.4, 1.4)
             particle.move()
 
+        self.savePositions()
         self.draw_scene()
         self.simulationGraphicsView.viewport().update()
         self.fitness_list.append(global_best_fitness)
@@ -605,6 +617,70 @@ class Ui_mainWindow(QMainWindow):
         self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
 
         # self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode(1))
+
+    def savePositions(self):
+        pos = [particle.position.copy() for particle in self.particles]
+        self.pos_list.append(pos)
+
+    # def displayPosition(self, iterationNumber):
+    #     self.scene.clear()
+    #     self.simulationGraphicsView.viewport().update()
+    #
+    #     for i in range(self.num_particles):
+    #         x = self.pos_list[iterationNumber][i][0]
+    #         y = self.pos_list[iterationNumber][i][1]
+    #
+    #         # Display current iteration
+    #         iterationText = self.scene.addText("Iteration: %s" % str(iterationNumber))
+    #         font = QFont()
+    #         font.setPointSize(20)
+    #         iterationText.setFont(font)
+    #         iterationText.setPos(0, 0)
+    #
+    #         # Draw robot as a blue circle
+    #         robot_color = QColor(Qt.blue)
+    #         robot_brush = QBrush(robot_color)
+    #         size = 15
+    #
+    #         self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
+    #
+    #         # Draw target as a red circle
+    #         target_brush = QBrush(Qt.red)
+    #         self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
+
+    def displayPosition(self):
+        self.scene.clear()
+        self.simulationGraphicsView.viewport().update()
+
+        for i in range(self.num_particles):
+            x = self.pos_list[0][i][0]
+            y = self.pos_list[0][i][1]
+            #
+            # particle = Particle(x, y)
+            # self.particles.append(particle)
+        #
+        # for particle in self.particles:
+        #     x = particle.position[0]
+        #     y = particle.position[1]
+
+            # Display current iteration
+            iterationText = self.scene.addText("Iteration: %s" % str(0))
+            font = QFont()
+            font.setPointSize(20)
+            iterationText.setFont(font)
+            iterationText.setPos(0, 0)
+
+            # Draw robot as a blue circle
+            robot_color = QColor(Qt.blue)
+            robot_brush = QBrush(robot_color)
+            size = 15
+
+            self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
+
+            # Draw target as a red circle
+            target_brush = QBrush(Qt.red)
+            self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
+
 
     def resetScene(self):
         self.scene.clear()
