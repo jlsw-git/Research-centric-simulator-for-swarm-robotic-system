@@ -173,8 +173,8 @@ class Ui_mainWindow(QMainWindow):
 
         """ simulationGroupBox """
         self.simulationGroupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
-        self.simulationGroupBox.setGeometry(QtCore.QRect(0, 450, 331, 271))
-        self.simulationGroupBox.setMinimumSize(QtCore.QSize(331, 271))
+        self.simulationGroupBox.setGeometry(QtCore.QRect(0, 450, 331, 371))
+        self.simulationGroupBox.setMinimumSize(QtCore.QSize(331, 371))
         self.simulationGroupBox.setAutoFillBackground(True)
         self.simulationGroupBox.setObjectName("simulationGroupBox")
 
@@ -252,6 +252,32 @@ class Ui_mainWindow(QMainWindow):
         self.horizontalLayout_5.addWidget(self.resetPushButton)
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_5)
+
+        self.currentIterationLabel = QtWidgets.QLabel(self.simulationGroupBox)
+        self.currentIterationLabel.setGeometry(QtCore.QRect(10, 260, 47, 13))
+        self.currentIterationLabel.setObjectName("currentIterationLabel")
+
+        self.iterationSlider = QtWidgets.QSlider(self.simulationGroupBox)
+        self.iterationSlider.setGeometry(QtCore.QRect(80, 280, 160, 22))
+        self.iterationSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.iterationSlider.setObjectName("iterationSlider")
+        self.iterationSlider.setMinimum(0)
+        self.iterationSlider.setValue(0)
+        self.iterationSlider.setDisabled(True)
+
+        self.firstIterationLabel = QtWidgets.QLabel(self.simulationGroupBox)
+        self.firstIterationLabel.setGeometry(QtCore.QRect(80, 300, 21, 20))
+        self.firstIterationLabel.setObjectName("firstIterationLabel")
+
+        self.finalIterationLabel = QtWidgets.QLabel(self.simulationGroupBox)
+        self.finalIterationLabel.setGeometry(QtCore.QRect(230, 300, 81, 20))
+        self.finalIterationLabel.setObjectName("finalIterationLabel")
+
+        self.iterationSpinBox_2 = QtWidgets.QSpinBox(self.simulationGroupBox)
+        self.iterationSpinBox_2.setGeometry(QtCore.QRect(260, 280, 42, 22))
+        self.iterationSpinBox_2.setObjectName("iterationSpinBox_2")
+        self.iterationSpinBox_2.setMinimum(0)
+        self.iterationSpinBox_2.setDisabled(True)
 
         """ swarmDesignGroupBox """
         self.swarmDesignGroupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
@@ -353,15 +379,15 @@ class Ui_mainWindow(QMainWindow):
         # Testing reset
         self.resetPushButton.clicked.connect(self.resetScene)
 
-        # Testing load
-        self.loadPushButton.clicked.connect(self.displayPosition)
+        # Testing slider
+        self.iterationSlider.valueChanged.connect(self.displayPosition)
 
-
+        # Iteration Spin Box
+        self.iterationSpinBox_2.valueChanged.connect(self.adjustIterationSlider)
 
     def retranslateUi(self, mainWindow):
         _translate = QtCore.QCoreApplication.translate
         mainWindow.setWindowTitle(_translate("mainWindow", "Swarm Robotics Simulator"))
-        # self.timeLabel.setText(_translate("mainWindow", "Time:"))
         self.parametersGroupBox.setTitle(_translate("mainWindow", "Parameters"))
         self.agentNumberLabel.setText(_translate("mainWindow", "Number of agents:"))
         self.iterationLabel.setText(_translate("mainWindow", "Iterations:"))
@@ -384,6 +410,9 @@ class Ui_mainWindow(QMainWindow):
         self.startSimPushButton.setText(_translate("mainWindow", "Start Simulation"))
         self.loadPushButton.setText(_translate("mainWindow", "Load"))
         self.resetPushButton.setText(_translate("mainWindow", "Reset"))
+        self.currentIterationLabel.setText(_translate("mainWindow", "Iteration:"))
+        self.firstIterationLabel.setText(_translate("mainWindow", "0"))
+        self.finalIterationLabel.setText(_translate("mainWindow", "-"))
         self.swarmDesignGroupBox.setTitle(_translate("mainWindow", "Swarm Design"))
         self.dropAlgoLabel.setText(_translate("mainWindow", " Drop Python file"))
         self.taskLabel.setText(_translate("mainWindow", "Task:"))
@@ -398,6 +427,9 @@ class Ui_mainWindow(QMainWindow):
     # For debugging purposes
     def buttonIsClicked(self):
         print("button is clicked")
+
+    def slideNumber(self):
+        print(self.iterationSlider.sliderPosition())
 
     # To start recording of current screen
     def startRecord(self):
@@ -518,14 +550,15 @@ class Ui_mainWindow(QMainWindow):
     def startSimulation(self):
         self.scene.clear()
         self.startSimPushButton.setDisabled(True)
+        self.finalIterationLabel.setText("-")
 
         # Apply parameter values
         self.num_particles = self.agentNumberSpinBox.value()
         self.num_iterations = self.iterationSpinBox.value()
 
         # For debugging
-        # self.num_particles = 5
-        # self.num_iterations = 0
+        # self.num_particles = 100
+        # self.num_iterations = 5
 
         self.current_iteration = 0
         self.target = [300, 300]
@@ -589,6 +622,12 @@ class Ui_mainWindow(QMainWindow):
             plt.title('Swarm Fitness vs. Iteration')
             plt.show()
 
+            self.finalIterationLabel.setText(str(self.current_iteration))
+            self.iterationSlider.setMaximum(self.current_iteration)
+            self.iterationSpinBox_2.setMaximum(self.current_iteration)
+            self.iterationSlider.setDisabled(False)
+            self.iterationSpinBox_2.setDisabled(False)
+
         # Display current iteration
         iterationText = self.scene.addText("Iteration: %s" % str(self.current_iteration))
         font = QFont()
@@ -622,49 +661,17 @@ class Ui_mainWindow(QMainWindow):
         pos = [particle.position.copy() for particle in self.particles]
         self.pos_list.append(pos)
 
-    # def displayPosition(self, iterationNumber):
-    #     self.scene.clear()
-    #     self.simulationGraphicsView.viewport().update()
-    #
-    #     for i in range(self.num_particles):
-    #         x = self.pos_list[iterationNumber][i][0]
-    #         y = self.pos_list[iterationNumber][i][1]
-    #
-    #         # Display current iteration
-    #         iterationText = self.scene.addText("Iteration: %s" % str(iterationNumber))
-    #         font = QFont()
-    #         font.setPointSize(20)
-    #         iterationText.setFont(font)
-    #         iterationText.setPos(0, 0)
-    #
-    #         # Draw robot as a blue circle
-    #         robot_color = QColor(Qt.blue)
-    #         robot_brush = QBrush(robot_color)
-    #         size = 15
-    #
-    #         self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
-    #
-    #         # Draw target as a red circle
-    #         target_brush = QBrush(Qt.red)
-    #         self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
-
     def displayPosition(self):
         self.scene.clear()
         self.simulationGraphicsView.viewport().update()
+        self.iterationSpinBox_2.setValue(self.iterationSlider.sliderPosition())
 
         for i in range(self.num_particles):
-            x = self.pos_list[0][i][0]
-            y = self.pos_list[0][i][1]
-            #
-            # particle = Particle(x, y)
-            # self.particles.append(particle)
-        #
-        # for particle in self.particles:
-        #     x = particle.position[0]
-        #     y = particle.position[1]
+            x = self.pos_list[self.iterationSlider.sliderPosition()][i][0]
+            y = self.pos_list[self.iterationSlider.sliderPosition()][i][1]
 
             # Display current iteration
-            iterationText = self.scene.addText("Iteration: %s" % str(0))
+            iterationText = self.scene.addText("Iteration: %s" % str(self.iterationSlider.sliderPosition()))
             font = QFont()
             font.setPointSize(20)
             iterationText.setFont(font)
@@ -677,10 +684,12 @@ class Ui_mainWindow(QMainWindow):
 
             self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
 
-            # Draw target as a red circle
-            target_brush = QBrush(Qt.red)
-            self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
+        # Draw target as a red circle
+        target_brush = QBrush(Qt.red)
+        self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
 
+    def adjustIterationSlider(self):
+        self.iterationSlider.setSliderPosition(self.iterationSpinBox_2.value())
 
     def resetScene(self):
         self.scene.clear()

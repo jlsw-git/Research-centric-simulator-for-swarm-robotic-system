@@ -22,6 +22,7 @@ class Particle:
 
         self.velocity = [inertia_weight * v + c + s for v, c, s in zip(self.velocity, cognitive_component, social_component)]
 
+
     def evaluate_fitness(self, target):
         distance = math.sqrt((self.position[0] - target[0])**2 + (self.position[1] - target[1])**2)
 
