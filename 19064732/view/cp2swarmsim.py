@@ -551,6 +551,7 @@ class Ui_mainWindow(QMainWindow):
         self.scene.clear()
         self.startSimPushButton.setDisabled(True)
         self.finalIterationLabel.setText("-")
+        self.iterationSpinBox_2.setValue(0)
 
         # Apply parameter values
         self.num_particles = self.agentNumberSpinBox.value()
@@ -577,8 +578,7 @@ class Ui_mainWindow(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_particles)
 
-        # Issue here when rerunning start simulation
-        print("Speed value (higher indicates slower):", self.simSpeedHoriSlider.value())
+        print("Speed value in millis (higher indicates slower):", self.simSpeedHoriSlider.value())
         self.timer.start(self.simSpeedHoriSlider.value())
 
 
@@ -620,11 +620,14 @@ class Ui_mainWindow(QMainWindow):
             plt.xlabel('Iterations')
             plt.ylabel('Fitness value')
             plt.title('Swarm Fitness vs. Iteration')
+            plt.get_current_fig_manager().window.setGeometry(320, 190, 500, 500)
             plt.show()
 
             self.finalIterationLabel.setText(str(self.current_iteration))
             self.iterationSlider.setMaximum(self.current_iteration)
             self.iterationSpinBox_2.setMaximum(self.current_iteration)
+            self.iterationSlider.setValue(self.current_iteration)
+            self.iterationSpinBox_2.setValue(self.current_iteration)
             self.iterationSlider.setDisabled(False)
             self.iterationSpinBox_2.setDisabled(False)
 
@@ -654,8 +657,6 @@ class Ui_mainWindow(QMainWindow):
         # Draw target as a red circle
         target_brush = QBrush(Qt.red)
         self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
-
-        # self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode(1))
 
     def savePositions(self):
         pos = [particle.position.copy() for particle in self.particles]
