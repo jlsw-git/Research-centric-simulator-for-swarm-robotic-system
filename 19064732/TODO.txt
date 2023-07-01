@@ -29,3 +29,7 @@ load saved parameters (?)
 performance metrics
 log file
 load log file
+
+interactive plot (hover)
+button to select type of graph
+instead of replacing block of code in src, try read dropped file and run from its contents

@@ -554,73 +554,75 @@ class Ui_mainWindow(QMainWindow):
         self.iterationSpinBox_2.setValue(0)
 
         # Apply parameter values
-        self.num_particles = self.agentNumberSpinBox.value()
+        self.num_robots = self.agentNumberSpinBox.value()
         self.num_iterations = self.iterationSpinBox.value()
 
         # For debugging
-        # self.num_particles = 100
+        # self.num_robots = 100
         # self.num_iterations = 5
 
         self.current_iteration = 0
         self.target = [300, 300]
-        self.particles = []
+        self.robots = []
         self.fitness_list = []
         self.fitness_threshold = 0.005
 
         self.pos_list = []
 
-        for _ in range(self.num_particles):
+        for _ in range(self.num_robots):
             x = random.randint(0, 600)
             y = random.randint(0, 600)
-            particle = Particle(x, y)
-            self.particles.append(particle)
+            robot = Particle(x, y)                             #change according to algo
+            self.robots.append(robot)
 
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_particles)
+        self.timer.timeout.connect(self.update_positions)
 
-        print("Speed value in millis (higher indicates slower):", self.simSpeedHoriSlider.value())
+        # print("Speed value in millis (higher indicates slower):", self.simSpeedHoriSlider.value())
         self.timer.start(self.simSpeedHoriSlider.value())
 
 
-    def update_particles(self):
+    def update_positions(self):
+        """User defined function"""
         global_best_fitness = float('inf')
         global_best_position = None
 
-        for particle in self.particles:
-            fitness = particle.evaluate_fitness(self.target)
-            particle.update_best_position(fitness)
+        for robot in self.robots:
+            fitness = robot.evaluate_fitness(self.target)
+            robot.update_best_position(fitness)
 
             if fitness < global_best_fitness:
                 global_best_fitness = fitness
-                global_best_position = particle.position.copy()
+                global_best_position = robot.position.copy()
 
-            particle.update_velocity(global_best_position, 0.7, 1.4, 1.4)
-            particle.move()
+            robot.update_velocity(global_best_position, 0.7, 1.4, 1.4)
+            robot.move()
 
         self.savePositions()
         self.draw_scene()
         self.simulationGraphicsView.viewport().update()
         self.fitness_list.append(global_best_fitness)
 
-        # Stop if fitness threshold or max number of iterations is reached
+        # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
         if global_best_fitness < self.fitness_threshold or self.current_iteration >= self.num_iterations:
             self.timer.stop()
             self.startSimPushButton.setDisabled(False)
-            print("Stopped at Fitness:", global_best_fitness)
-            print("Stopped at Iteration:", self.current_iteration)
+            # print("Stopped at Fitness:", global_best_fitness)
+            # print("Stopped at Iteration:", self.current_iteration)
 
             # Plot graphs
             iteration_list = list(range(0, self.current_iteration+1))
 
-            print("Number of Agents:", self.num_iterations)
-            print("Iterations:", iteration_list)
-            print("Fitness:", self.fitness_list)
+            # print("Number of Agents:", self.num_iterations)
+            # print("Iterations:", iteration_list)
+            # print("Fitness:", self.fitness_list)
 
             plt.plot(iteration_list, self.fitness_list)
             plt.xlabel('Iterations')
             plt.ylabel('Fitness value')
             plt.title('Swarm Fitness vs. Iteration')
             plt.get_current_fig_manager().window.setGeometry(320, 190, 500, 500)
+            plt.grid(linestyle='dotted')
             plt.show()
 
             self.finalIterationLabel.setText(str(self.current_iteration))
@@ -644,9 +646,9 @@ class Ui_mainWindow(QMainWindow):
         self.scene.clear()
         self.simulationGraphicsView.viewport().update()
 
-        for particle in self.particles:
-            x = particle.position[0]
-            y = particle.position[1]
+        for robot in self.robots:
+            x = robot.position[0]
+            y = robot.position[1]
             size = 15
 
             # Draw robot as a blue circle
@@ -659,7 +661,7 @@ class Ui_mainWindow(QMainWindow):
         self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
 
     def savePositions(self):
-        pos = [particle.position.copy() for particle in self.particles]
+        pos = [robot.position.copy() for robot in self.robots]
         self.pos_list.append(pos)
 
     def displayPosition(self):
@@ -667,7 +669,7 @@ class Ui_mainWindow(QMainWindow):
         self.simulationGraphicsView.viewport().update()
         self.iterationSpinBox_2.setValue(self.iterationSlider.sliderPosition())
 
-        for i in range(self.num_particles):
+        for i in range(self.num_robots):
             x = self.pos_list[self.iterationSlider.sliderPosition()][i][0]
             y = self.pos_list[self.iterationSlider.sliderPosition()][i][1]
 

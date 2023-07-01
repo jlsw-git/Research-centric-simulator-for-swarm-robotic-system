@@ -13,6 +13,7 @@ class Particle:
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
 
+    # PSO calculation
     def update_velocity(self, global_best_position, inertia_weight, cognitive_weight, social_weight):
         r1 = random.random()
         r2 = random.random()
@@ -21,7 +22,6 @@ class Particle:
         social_component = [social_weight * r2 * (gbp - p) for gbp, p in zip(global_best_position, self.position)]
 
         self.velocity = [inertia_weight * v + c + s for v, c, s in zip(self.velocity, cognitive_component, social_component)]
-
 
     def evaluate_fitness(self, target):
         distance = math.sqrt((self.position[0] - target[0])**2 + (self.position[1] - target[1])**2)
