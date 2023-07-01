@@ -105,7 +105,7 @@ class Ui_mainWindow(QMainWindow):
         self.agentNumberSpinBox.setObjectName("agentNumberSpinBox")
         self.agentNumberSpinBox.setMinimum(1)
         self.agentNumberSpinBox.setMaximum(1000)
-        self.agentNumberSpinBox.setValue(500)
+        self.agentNumberSpinBox.setValue(100)
         self.horizontalLayout.addWidget(self.agentNumberSpinBox)
 
         self.formLayout_2.setLayout(0, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout)
@@ -120,7 +120,7 @@ class Ui_mainWindow(QMainWindow):
         self.iterationSpinBox.setObjectName("iterationSpinBox")
         self.iterationSpinBox.setMinimum(1)
         self.iterationSpinBox.setMaximum(1000)
-        self.iterationSpinBox.setValue(100)
+        self.iterationSpinBox.setValue(500)
         self.horizontalLayout_2.addWidget(self.iterationSpinBox)
 
         self.formLayout_2.setLayout(1, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_2)
@@ -191,7 +191,9 @@ class Ui_mainWindow(QMainWindow):
         self.simSpeedHoriSlider.setGeometry(QtCore.QRect(80, 60, 160, 22))
         self.simSpeedHoriSlider.setOrientation(QtCore.Qt.Horizontal)
         self.simSpeedHoriSlider.setObjectName("simSpeedHoriSlider")
-        self.simSpeedHoriSlider.setMinimum(50)
+        # self.simSpeedHoriSlider.setMinimum(50)
+        # self.simSpeedHoriSlider.setMaximum(250)
+        self.simSpeedHoriSlider.setMinimum(20)
         self.simSpeedHoriSlider.setMaximum(250)
         self.simSpeedHoriSlider.setValue(250)
         self.simSpeedHoriSlider.setInvertedAppearance(True)
@@ -566,15 +568,23 @@ class Ui_mainWindow(QMainWindow):
         self.target = [300, 300]
         self.robots = []
         self.fitness_list = []
-        self.fitness_threshold = 0.005
+        # self.fitness_threshold = 0.005
+        self.fitness_threshold = 0.2
 
         self.pos_list = []
 
+        # for _ in range(self.num_robots):
+        #     x = random.randint(0, 600)
+        #     y = random.randint(0, 600)
+        #     # robot = Particle(x, y)                             #change according to algo
+        #     robot = Firefly(x, y)                             #change according to algo
+        #     self.robots.append(robot)
+
+        # Initialize population
         for _ in range(self.num_robots):
-            x = random.randint(0, 600)
-            y = random.randint(0, 600)
-            # robot = Particle(x, y)                             #change according to algo
-            robot = Firefly(x, y)                             #change according to algo
+            x = random.uniform(-10, 10)
+            y = random.uniform(-10, 10)
+            robot = Firefly(x, y)
             self.robots.append(robot)
 
         self.timer = QTimer(self)
@@ -584,29 +594,81 @@ class Ui_mainWindow(QMainWindow):
         self.timer.start(self.simSpeedHoriSlider.value())
 
 
+
     def update_robots(self):
         """User defined function"""
-        global_best_fitness = float('inf')
-        global_best_position = None
+        global_best_fitness = 0
+        global_best_firefly = None
+        # global_best_fitness = float('inf')
+        # global_best_position = None
+
+        # for robot in self.robots:
+        #     fitness = robot.evaluate_fitness(self.target)
+        #     robot.update_best_position(fitness)
+        #
+        #     if fitness < global_best_fitness:
+        #         global_best_fitness = fitness
+        #         global_best_position = robot.position.copy()
+        #
+        #     robot.update_velocity(global_best_position, 0.7, 1.4, 1.4)
+        #     robot.move()
 
         for robot in self.robots:
-            fitness = robot.evaluate_fitness(self.target)
-            robot.update_best_position(fitness)
+            robot.evaluate_intensity(self.target)
 
-            if fitness < global_best_fitness:
-                global_best_fitness = fitness
-                global_best_position = robot.position.copy()
+            # Update global best firefly
+            if robot.intensity > global_best_fitness:
+                global_best_fitness = robot.intensity
+                global_best_firefly = robot
 
-            robot.update_velocity(global_best_position, 0.7, 1.4, 1.4)
+        # Move fireflies and update positions
+        for robot in self.robots:
+            for other_firefly in self.robots:
+                if robot.intensity < other_firefly.intensity:
+                    robot.update_position(other_firefly, attractiveness=1)
+
+        # Randomly move fireflies to explore new areas
+        for robot in self.robots:
             robot.move()
 
         self.savePositions()
         self.draw_scene()
         self.simulationGraphicsView.viewport().update()
         self.fitness_list.append(global_best_fitness)
+        print(global_best_fitness)
+
+        # # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
+        # if global_best_intensity < self.fitness_threshold or self.current_iteration >= self.num_iterations:
+        #     self.timer.stop()
+        #     self.startSimPushButton.setDisabled(False)
+        #     # print("Stopped at Fitness:", global_best_fitness)
+        #     # print("Stopped at Iteration:", self.current_iteration)
+        #
+        #     # Plot graphs
+        #     iteration_list = list(range(0, self.current_iteration+1))
+        #
+        #     # print("Number of Agents:", self.num_iterations)
+        #     # print("Iterations:", iteration_list)
+        #     # print("Fitness:", self.fitness_list)
+        #
+        #     plt.plot(iteration_list, self.fitness_list)
+        #     plt.xlabel('Iterations')
+        #     plt.ylabel('Fitness value')
+        #     plt.title('Swarm Fitness vs. Iteration')
+        #     plt.get_current_fig_manager().window.setGeometry(320, 190, 500, 500)
+        #     plt.grid(linestyle='dotted')
+        #     plt.show()
+        #
+        #     self.finalIterationLabel.setText(str(self.current_iteration))
+        #     self.iterationSlider.setMaximum(self.current_iteration)
+        #     self.iterationSpinBox_2.setMaximum(self.current_iteration)
+        #     self.iterationSlider.setValue(self.current_iteration)
+        #     self.iterationSpinBox_2.setValue(self.current_iteration)
+        #     self.iterationSlider.setDisabled(False)
+        #     self.iterationSpinBox_2.setDisabled(False)
 
         # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
-        if global_best_fitness < self.fitness_threshold or self.current_iteration >= self.num_iterations:
+        if global_best_fitness > self.fitness_threshold or self.current_iteration >= self.num_iterations:
             self.timer.stop()
             self.startSimPushButton.setDisabled(False)
             # print("Stopped at Fitness:", global_best_fitness)
