@@ -1,3 +1,7 @@
+"""------Reserved line to write model import------"""
+from model.Particle import Particle
+"""---------------------------------------_-------"""
+
 import random
 import os
 import cv2
@@ -9,11 +13,8 @@ from datetime import date
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QBrush, QColor, QFont
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QMainWindow, QGraphicsScene, QGraphicsView
+from PyQt5.QtWidgets import QFileDialog, QMainWindow, QGraphicsScene, QGraphicsView, QMessageBox
 
-from model.Particle import Particle
-from model.Firefly import Firefly
-"""implement import all from model"""
 
 class SimulatorView(QMainWindow):
     def setupUi(self, mainWindow):
@@ -212,6 +213,7 @@ class SimulatorView(QMainWindow):
 
         self.startSimPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
         self.startSimPushButton.setObjectName("startSimPushButton")
+        self.startSimPushButton.setDisabled(True)
         self.verticalLayout_4.addWidget(self.startSimPushButton)
 
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
@@ -388,14 +390,14 @@ class SimulatorView(QMainWindow):
         self.firstIterationLabel.setText(_translate("mainWindow", "0"))
         self.finalIterationLabel.setText(_translate("mainWindow", "-"))
         self.swarmDesignGroupBox.setTitle(_translate("mainWindow", "Swarm Design"))
-        self.dropAlgoLabel.setText(_translate("mainWindow", " Drop Python file"))
+        self.dropAlgoLabel.setText(_translate("mainWindow", " Drop .py here"))
         self.dropAlgoLabel.setAlignment(Qt.AlignCenter)
         self.taskLabel.setText(_translate("mainWindow", "Task:"))
         self.taskComboBox.setItemText(0, _translate("mainWindow", "Aggregation"))
         self.taskComboBox.setItemText(1, _translate("mainWindow", "Exploration"))
         self.taskComboBox.setItemText(2, _translate("mainWindow", "Foraging"))
         self.algorithmLabel.setText(_translate("mainWindow", "Selected Algorithm:"))
-        self.selectedAlgoLabel.setText(_translate("mainWindow", ""))
+        self.selectedAlgoLabel.setText(_translate("mainWindow", "Please select an algorithm."))
         self.algorithmToolButton.setText(_translate("mainWindow", "..."))
 
     """ Object Event Functions """
@@ -431,13 +433,13 @@ class SimulatorView(QMainWindow):
         out = cv2.VideoWriter(filepath, codec, fps, res)
 
         # Create empty window
-        cv2.namedWindow("Recording..", cv2.WINDOW_NORMAL)
+        cv2.namedWindow("Recording.. ('Q' to stop)", cv2.WINDOW_NORMAL)
 
         # Resize window
-        cv2.resizeWindow("Recording..", 300, 200)
+        cv2.resizeWindow("Recording.. ('Q' to stop)", 300, 200)
 
         # Move window to top left corner
-        cv2.moveWindow("Recording..", 0, 0)
+        cv2.moveWindow("Recording.. ('Q' to stop)", 0, 0)
 
         while True:
             # Take screenshot using PyAutoGUI
@@ -453,7 +455,7 @@ class SimulatorView(QMainWindow):
             out.write(frame)
 
             # Display recording screen
-            cv2.imshow("Recording..", frame)
+            cv2.imshow("Recording.. ('Q' to stop)", frame)
 
             # Wait for keystroke 'q' or stopPushButton to be clicked
             if cv2.waitKey(1) == ord('q') or self.stopPushButton.isDown():
@@ -478,18 +480,44 @@ class SimulatorView(QMainWindow):
     def selectAlgorithm(self):
         path, ftype = QFileDialog.getOpenFileName(None, "Select a Swarm Algorithm", "./model/", "PY Files (*.py)")
 
-        # Get file name
-        fname = path.split("/")[-1]
+        if path != '':
+            # Get file name
+            fname = path.split("/")[-1]       # Particle.py
+            fname_only = fname.split('.')[0]
+            import_statement = 'from model.%s import %s\n' % (fname_only, fname_only)
 
-        # Display file name on simulator
-        self.dropAlgoLabel.setText(fname)
+            # Read the contents of the file
+            with open('./view/SimulatorView.py', 'r') as file:
+                lines = file.readlines()
 
-        """ Incomplete section - insert/replace block of codes from new algo (or pass .py as parameter?)
-        Read file
-        Note: 'r' denotes open for reading only
-        with open(path, 'r') as f:
-            print(f.read())
-        """
+            # Check if the import already exists
+            if import_statement not in lines:
+                lines[1] = import_statement
+
+                # Write import statement into this file
+                with open('./view/SimulatorView.py', 'w') as file:
+                    file.writelines(lines)
+
+                # Display dialog to restart program
+                restart_dialog = QMessageBox()
+                restart_dialog.setText("Restart is required.")
+                restart_dialog.setWindowTitle("Swarm Robotics Simulator")
+                restart_dialog.setStandardButtons(QMessageBox.Ok)
+
+                result = restart_dialog.exec_()
+                if result == QMessageBox.Ok:
+                    # Close program
+                    exit()
+            else:
+                self.startSimPushButton.setDisabled(False)
+                self.selectedAlgoLabel.setText(fname)
+
+            """ Incomplete section - insert/replace block of codes from new algo (or pass .py as parameter?)
+            Read file
+            Note: 'r' denotes open for reading only
+            with open(path, 'r') as f:
+                print(f.read())
+            """
 
     # To get path of dragged algorithm files
     def dragEnterEvent(self, event):
@@ -508,15 +536,20 @@ class SimulatorView(QMainWindow):
 
         # If file type is .py, add to model folder
         if ext == 'py':
-            # Check if file name  already exists
+            # Check if file name already exists
             if os.path.exists(to_path):
                 self.selectedAlgoLabel.setText("Error! File already exists.")
+
+            # Check if file is empty
+            elif os.path.getsize(from_path) == 0:
+                self.selectedAlgoLabel.setText("Error! File is empty.")
+
             else:
                 self.selectedAlgoLabel.setText("Added %s!" % fname)
                 shutil.copyfile(from_path, to_path)
 
         else:
-            self.selectedAlgoLabel.setText("Error! Invalid Python file.")
+            self.selectedAlgoLabel.setText("Error! Invalid file type.")
 
         """ Incomplete section
         # Apply selected algorithm into simulation
