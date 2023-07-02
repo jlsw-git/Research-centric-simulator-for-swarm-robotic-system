@@ -1,6 +1,7 @@
 import random
 import os
 import cv2
+import shutil
 import numpy as np
 import pyautogui
 import matplotlib.pyplot as plt
@@ -12,6 +13,7 @@ from PyQt5.QtWidgets import QFileDialog, QMainWindow, QGraphicsScene, QGraphicsV
 
 from model.Particle import Particle
 from model.Firefly import Firefly
+"""implement import all from model"""
 
 class SimulatorView(QMainWindow):
     def setupUi(self, mainWindow):
@@ -387,6 +389,7 @@ class SimulatorView(QMainWindow):
         self.finalIterationLabel.setText(_translate("mainWindow", "-"))
         self.swarmDesignGroupBox.setTitle(_translate("mainWindow", "Swarm Design"))
         self.dropAlgoLabel.setText(_translate("mainWindow", " Drop Python file"))
+        self.dropAlgoLabel.setAlignment(Qt.AlignCenter)
         self.taskLabel.setText(_translate("mainWindow", "Task:"))
         self.taskComboBox.setItemText(0, _translate("mainWindow", "Aggregation"))
         self.taskComboBox.setItemText(1, _translate("mainWindow", "Exploration"))
@@ -479,7 +482,7 @@ class SimulatorView(QMainWindow):
         fname = path.split("/")[-1]
 
         # Display file name on simulator
-        self.selectedAlgoLabel.setText(fname)
+        self.dropAlgoLabel.setText(fname)
 
         """ Incomplete section - insert/replace block of codes from new algo (or pass .py as parameter?)
         Read file
@@ -498,16 +501,22 @@ class SimulatorView(QMainWindow):
     # To accept path of dropped algorithm files
     def dropEvent(self, event):
         files = [u.toLocalFile() for u in event.mimeData().urls()]
-        path = files[0]  # C:/Users/user/Desktop/19064732/model/sample.py
-        fname = path.split('/')[-1]  # sample.py
+        from_path = files[0]  # C:/Users/user/Desktop/19064732/model/sample.py
+        fname = from_path.split('/')[-1]  # sample.py
         ext = fname.split('.')[-1]  # py
+        to_path = "./model/%s" %fname
 
+        # If file type is .py, add to model folder
         if ext == 'py':
-            self.selectedAlgoLabel.setText(fname)
+            # Check if file name  already exists
+            if os.path.exists(to_path):
+                self.selectedAlgoLabel.setText("Error! File already exists.")
+            else:
+                self.selectedAlgoLabel.setText("Added %s!" % fname)
+                shutil.copyfile(from_path, to_path)
+
         else:
             self.selectedAlgoLabel.setText("Error! Invalid Python file.")
-
-
 
         """ Incomplete section
         # Apply selected algorithm into simulation
