@@ -1,6 +1,8 @@
-"""------Reserved line to write model import------"""
-from model.Particle import Particle
-"""---------------------------------------_-------"""
+"""Reserve 3rd line to write import statement"""
+try:
+    from model.Particle import Particle
+except ModuleNotFoundError:
+    pass
 
 import random
 import os
@@ -484,7 +486,7 @@ class SimulatorView(QMainWindow):
             # Get file name
             fname = path.split("/")[-1]       # Particle.py
             fname_only = fname.split('.')[0]
-            import_statement = 'from model.%s import %s\n' % (fname_only, fname_only)
+            import_statement = '    from model.%s import %s\n' % (fname_only, fname_only)
 
             # Read the contents of the file
             with open('./view/SimulatorView.py', 'r') as file:
@@ -492,7 +494,7 @@ class SimulatorView(QMainWindow):
 
             # Check if the import already exists
             if import_statement not in lines:
-                lines[1] = import_statement
+                lines[2] = import_statement
 
                 # Write import statement into this file
                 with open('./view/SimulatorView.py', 'w') as file:
