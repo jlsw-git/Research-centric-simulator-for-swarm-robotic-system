@@ -105,7 +105,7 @@ class Ui_mainWindow(QMainWindow):
         self.agentNumberSpinBox.setObjectName("agentNumberSpinBox")
         self.agentNumberSpinBox.setMinimum(1)
         self.agentNumberSpinBox.setMaximum(1000)
-        self.agentNumberSpinBox.setValue(500)
+        self.agentNumberSpinBox.setValue(100)
         self.horizontalLayout.addWidget(self.agentNumberSpinBox)
 
         self.formLayout_2.setLayout(0, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout)
@@ -119,8 +119,8 @@ class Ui_mainWindow(QMainWindow):
         self.iterationSpinBox = QtWidgets.QSpinBox(self.parametersGroupBox)
         self.iterationSpinBox.setObjectName("iterationSpinBox")
         self.iterationSpinBox.setMinimum(1)
-        self.iterationSpinBox.setMaximum(1000)
-        self.iterationSpinBox.setValue(100)
+        self.iterationSpinBox.setMaximum(100000)
+        self.iterationSpinBox.setValue(500)
         self.horizontalLayout_2.addWidget(self.iterationSpinBox)
 
         self.formLayout_2.setLayout(1, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_2)
@@ -425,13 +425,6 @@ class Ui_mainWindow(QMainWindow):
         self.algorithmToolButton.setText(_translate("mainWindow", "..."))
 
     """ Object Event Functions """
-    # For debugging purposes
-    def buttonIsClicked(self):
-        print("button is clicked")
-
-    def slideNumber(self):
-        print(self.iterationSlider.sliderPosition())
-
     # To start recording of current screen
     def startRecord(self):
 
@@ -558,10 +551,6 @@ class Ui_mainWindow(QMainWindow):
         self.num_robots = self.agentNumberSpinBox.value()
         self.num_iterations = self.iterationSpinBox.value()
 
-        # For debugging
-        # self.num_robots = 100
-        # self.num_iterations = 5
-
         self.current_iteration = 0
         self.target = [300, 300]
         self.robots = []
@@ -573,19 +562,15 @@ class Ui_mainWindow(QMainWindow):
         for _ in range(self.num_robots):
             x = random.randint(0, 600)
             y = random.randint(0, 600)
-            # robot = Particle(x, y)                             #change according to algo
-            robot = Firefly(x, y)                             #change according to algo
+            robot = Particle(x, y)
             self.robots.append(robot)
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_robots)
-
-        # print("Speed value in millis (higher indicates slower):", self.simSpeedHoriSlider.value())
         self.timer.start(self.simSpeedHoriSlider.value())
 
 
     def update_robots(self):
-        """User defined function"""
         global_best_fitness = float('inf')
         global_best_position = None
 
@@ -597,7 +582,7 @@ class Ui_mainWindow(QMainWindow):
                 global_best_fitness = fitness
                 global_best_position = robot.position.copy()
 
-            robot.update_velocity(global_best_position, 0.7, 1.4, 1.4)
+            robot.update_velocity(global_best_position, 0.7, 1.2, 1)
             robot.move()
 
         self.savePositions()
@@ -609,15 +594,9 @@ class Ui_mainWindow(QMainWindow):
         if global_best_fitness < self.fitness_threshold or self.current_iteration >= self.num_iterations:
             self.timer.stop()
             self.startSimPushButton.setDisabled(False)
-            # print("Stopped at Fitness:", global_best_fitness)
-            # print("Stopped at Iteration:", self.current_iteration)
 
             # Plot graphs
             iteration_list = list(range(0, self.current_iteration+1))
-
-            # print("Number of Agents:", self.num_iterations)
-            # print("Iterations:", iteration_list)
-            # print("Fitness:", self.fitness_list)
 
             plt.plot(iteration_list, self.fitness_list)
             plt.xlabel('Iterations')

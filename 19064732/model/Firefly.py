@@ -3,15 +3,16 @@ import random
 
 
 class Firefly:
-
     def __init__(self, x, y):
         self.position = [x, y]
+        self.velocity = [random.uniform(-10, 10), random.uniform(-10, 10)]
         self.intensity = None
 
     def move(self):
         self.position[0] += random.uniform(-10, 10)
         self.position[1] += random.uniform(-10, 10)
 
+    """ #use kwargss here?"""
     def update_position(self, other_firefly, attractiveness):
         distance = math.sqrt((self.position[0] - other_firefly.position[0])**2 + (self.position[1] - other_firefly.position[1])**2)
         attractiveness_factor = attractiveness / (1 + distance**2)
@@ -21,8 +22,10 @@ class Firefly:
         self.position[1] = self.position[1] + attractiveness_factor * (other_firefly.position[1] - self.position[1]) + random_step
 
     def evaluate_intensity(self, target):
+        # distance = self.intensity = 1 / (1 + (math.sqrt((self.position[0] - target[0])**2 + (self.position[1] - target[1])**2)))
         distance = math.sqrt((self.position[0] - target[0])**2 + (self.position[1] - target[1])**2)
         self.intensity = 1 / (1 + distance)  # Inverse of distance as intensity
+
 
 # def firefly_algorithm(population_size, target, attractiveness, max_iterations):
 #     population = []
