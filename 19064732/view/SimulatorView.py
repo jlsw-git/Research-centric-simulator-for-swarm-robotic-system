@@ -6,6 +6,7 @@ except ModuleNotFoundError:
 
 import random
 import os
+import sys
 import cv2
 import shutil
 import numpy as np
@@ -485,8 +486,29 @@ class SimulatorView(QMainWindow):
         if path != '':
             # Get file name
             fname = path.split("/")[-1]       # Particle.py
-            fname_only = fname.split('.')[0]
+            fname_only = fname.split('.')[0]  # Particle
+            ext = fname.split('.')[-1]        # py
+            to_path = "./model/%s" % fname
             import_statement = '    from model.%s import %s\n' % (fname_only, fname_only)
+
+            # Check if file exists in model folder
+            if not (os.path.exists(to_path)):
+                # If file type is .py, add to model folder
+                if ext == 'py':
+                    # Check if file name already exists
+                    if os.path.exists(to_path):
+                        self.selectedAlgoLabel.setText("Error! File already exists.")
+
+                    # Check if file is empty
+                    elif os.path.getsize(path) == 0:
+                        self.selectedAlgoLabel.setText("Error! File is empty.")
+
+                    else:
+                        self.selectedAlgoLabel.setText("Added %s!" % fname)
+                        shutil.copyfile(path, to_path)
+
+                else:
+                    self.selectedAlgoLabel.setText("Error! Invalid file type.")
 
             # Read the contents of the file
             with open('./view/SimulatorView.py', 'r') as file:
@@ -502,14 +524,16 @@ class SimulatorView(QMainWindow):
 
                 # Display dialog to restart program
                 restart_dialog = QMessageBox()
-                restart_dialog.setText("Restart is required.")
+                restart_dialog.setText("Restart is required. App will restart minimised.")
                 restart_dialog.setWindowTitle("Swarm Robotics Simulator")
                 restart_dialog.setStandardButtons(QMessageBox.Ok)
 
                 result = restart_dialog.exec_()
                 if result == QMessageBox.Ok:
                     # Close program
-                    exit()
+                    # exit()
+                    os.execl(sys.executable, sys.executable, *sys.argv)
+
             else:
                 self.startSimPushButton.setDisabled(False)
                 self.selectedAlgoLabel.setText(fname)
