@@ -233,7 +233,7 @@ class SimulatorView(QMainWindow):
         self.verticalLayout_4.addLayout(self.horizontalLayout_5)
 
         self.currentIterationLabel = QtWidgets.QLabel(self.simulationGroupBox)
-        self.currentIterationLabel.setGeometry(QtCore.QRect(10, 260, 47, 13))
+        self.currentIterationLabel.setGeometry(QtCore.QRect(10, 260, 80, 13))
         self.currentIterationLabel.setObjectName("currentIterationLabel")
 
         self.iterationSlider = QtWidgets.QSlider(self.simulationGroupBox)
@@ -389,7 +389,7 @@ class SimulatorView(QMainWindow):
         self.startSimPushButton.setText(_translate("mainWindow", "Start Simulation"))
         self.loadPushButton.setText(_translate("mainWindow", "Load"))
         self.resetPushButton.setText(_translate("mainWindow", "Reset"))
-        self.currentIterationLabel.setText(_translate("mainWindow", "Iteration:"))
+        self.currentIterationLabel.setText(_translate("mainWindow", "Load Iteration:"))
         self.firstIterationLabel.setText(_translate("mainWindow", "0"))
         self.finalIterationLabel.setText(_translate("mainWindow", "-"))
         self.swarmDesignGroupBox.setTitle(_translate("mainWindow", "Swarm Design"))
@@ -538,13 +538,6 @@ class SimulatorView(QMainWindow):
                 self.startSimPushButton.setDisabled(False)
                 self.selectedAlgoLabel.setText(fname)
 
-            """ Incomplete section - insert/replace block of codes from new algo (or pass .py as parameter?)
-            Read file
-            Note: 'r' denotes open for reading only
-            with open(path, 'r') as f:
-                print(f.read())
-            """
-
     # To get path of dragged algorithm files
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -582,18 +575,14 @@ class SimulatorView(QMainWindow):
         """
 
     def startSimulation(self):
+        self.adjustButtonBeforeSim()
+
         fname = self.selectedAlgoLabel.text().split('.')[0]
         startSimFunction = eval("self.startSimulation_%s" % fname)
         startSimFunction()
-        # self.startSimPushButton.clicked.connect(eval(startSimFunction))
 
-
+    """User-defined"""
     def startSimulation_Particle(self):
-        self.scene.clear()
-        self.startSimPushButton.setDisabled(True)
-        self.finalIterationLabel.setText("-")
-        self.iterationSpinBox_2.setValue(0)
-
         # Apply parameter values
         self.num_robots = self.agentNumberSpinBox.value()
         self.num_iterations = self.iterationSpinBox.value()
@@ -616,19 +605,7 @@ class SimulatorView(QMainWindow):
         self.timer.timeout.connect(self.update_robots_PSO)
         self.timer.start(self.simSpeedHoriSlider.value())
 
-        # # Check type of robot and run respective update function
-        # if isinstance(robot, Particle):
-        #     self.timer.timeout.connect(self.update_robots_PSO)
-        # elif isinstance(robot, Firefly):
-        #     self.timer.timeout.connect(self.update_robots_FA)
-
-
     def startSimulation_Firefly(self):
-        self.scene.clear()
-        self.startSimPushButton.setDisabled(True)
-        self.finalIterationLabel.setText("-")
-        self.iterationSpinBox_2.setValue(0)
-
         # Apply parameter values
         self.num_robots = self.agentNumberSpinBox.value()
         self.num_iterations = self.iterationSpinBox.value()
@@ -677,13 +654,7 @@ class SimulatorView(QMainWindow):
             self.adjustButtonAfterSim()
             self.plotGraphs()
 
-        # Display current iteration
-        iterationText = self.scene.addText("Iteration: %s" % str(self.current_iteration))
-        font = QFont()
-        font.setPointSize(20)
-        iterationText.setFont(font)
-        iterationText.setPos(0, 0)
-
+        self.displayCurrentIteration()
         self.current_iteration += 1
 
     def update_robots_FA(self):
@@ -713,32 +684,24 @@ class SimulatorView(QMainWindow):
             self.adjustButtonAfterSim()
             self.plotGraphs()
 
-        # Display current iteration
-        iterationText = self.scene.addText("Iteration: %s" % str(self.current_iteration))
-        font = QFont()
-        font.setPointSize(20)
-        iterationText.setFont(font)
-        iterationText.setPos(0, 0)
-
+        self.displayCurrentIteration()
         self.current_iteration += 1
+
+    """"""
 
     def draw_scene(self):
         self.scene.clear()
         self.simulationGraphicsView.viewport().update()
 
+        model_size = 15
+
         for robot in self.robots:
             x = robot.position[0]
             y = robot.position[1]
-            size = 15
 
-            # Draw robot as a blue circle
-            robot_color = QColor(Qt.blue)
-            robot_brush = QBrush(robot_color)
-            self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
+            self.drawRobot(model_size, x, y)
 
-        # Draw target as a red circle
-        target_brush = QBrush(Qt.red)
-        self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
+        self.drawTarget(model_size)
 
     def savePositions(self):
         pos = [robot.position.copy() for robot in self.robots]
@@ -749,27 +712,17 @@ class SimulatorView(QMainWindow):
         self.simulationGraphicsView.viewport().update()
         self.iterationSpinBox_2.setValue(self.iterationSlider.sliderPosition())
 
+        model_size = 15
+
         for iterationNo in range(self.num_robots):
             x = self.pos_list[self.iterationSlider.sliderPosition()][iterationNo][0]
             y = self.pos_list[self.iterationSlider.sliderPosition()][iterationNo][1]
 
-            # Display current iteration
-            iterationText = self.scene.addText("Iteration: %s" % str(self.iterationSlider.sliderPosition()))
-            font = QFont()
-            font.setPointSize(20)
-            iterationText.setFont(font)
-            iterationText.setPos(0, 0)
+            self.displayCurrentIteration()
 
-            # Draw robot as a blue circle
-            robot_color = QColor(Qt.blue)
-            robot_brush = QBrush(robot_color)
-            size = 15
+            self.drawRobot(model_size, x, y)
 
-            self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
-
-        # Draw target as a red circle
-        target_brush = QBrush(Qt.red)
-        self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
+        self.drawTarget(model_size)
 
     def adjustIterationSlider(self):
         self.iterationSlider.setSliderPosition(self.iterationSpinBox_2.value())
@@ -788,8 +741,31 @@ class SimulatorView(QMainWindow):
         """ Incomplete - implement stop running simulation """
         # self.startSimPushButton.setDisabled(False)
 
+    def adjustButtonBeforeSim(self):
+        self.scene.clear()
+
+        self.swarmDesignGroupBox.setDisabled(True)
+        self.parametersGroupBox.setDisabled(True)
+
+        self.startSimPushButton.setDisabled(True)
+        self.finalIterationLabel.setText("-")
+        self.iterationSpinBox_2.setValue(0)
+        self.simSpeedHoriSlider.setDisabled(True)
+
+        self.iterationSlider.setDisabled(True)
+        self.iterationSpinBox_2.setDisabled(True)
+
     def adjustButtonAfterSim(self):
         self.timer.stop()
+
+        self.swarmDesignGroupBox.setDisabled(False)
+        self.parametersGroupBox.setDisabled(False)
+
+        self.simSpeedHoriSlider.setDisabled(False)
+
+        self.iterationSlider.setDisabled(False)
+        self.iterationSpinBox_2.setDisabled(False)
+
         self.startSimPushButton.setDisabled(False)
         self.finalIterationLabel.setText(str(self.current_iteration))
         self.iterationSlider.setMaximum(self.current_iteration)
@@ -810,3 +786,23 @@ class SimulatorView(QMainWindow):
         plt.get_current_fig_manager().window.setGeometry(320, 190, 500, 500)
         plt.grid(linestyle='dotted')
         plt.show()
+
+    # Display current iteration
+    def displayCurrentIteration(self):
+        iterationText = self.scene.addText("Iteration: %s" % str(self.current_iteration))
+        font = QFont()
+        font.setPointSize(20)
+        iterationText.setFont(font)
+        iterationText.setPos(0, 0)
+
+    # Draw robot as a blue circle
+    def drawRobot(self, size, x, y):
+        robot_color = QColor(Qt.blue)
+        robot_brush = QBrush(robot_color)
+
+        self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
+
+    # Draw target as a red circle
+    def drawTarget(self, size):
+        target_brush = QBrush(Qt.red)
+        self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
