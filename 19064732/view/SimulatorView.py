@@ -1,6 +1,6 @@
 """Reserve 3rd line to write import statement"""
 try:
-    from model.Firefly import Firefly
+    from model.Particle import Particle
 except ModuleNotFoundError:
     pass
 
@@ -406,7 +406,6 @@ class SimulatorView(QMainWindow):
     """ Object Event Functions """
     # To start recording of current screen
     def startRecord(self):
-
         self.startPushButton.setDisabled(True)
         self.stopPushButton.setDisabled(False)
 
@@ -433,7 +432,7 @@ class SimulatorView(QMainWindow):
         fps = 20.0
 
         # Create VideoWriter object
-        out = cv2.VideoWriter(filepath, codec, fps, res)
+        output = cv2.VideoWriter(filepath, codec, fps, res)
 
         # Create empty window
         cv2.namedWindow("Recording.. ('Q' to stop)", cv2.WINDOW_NORMAL)
@@ -455,9 +454,9 @@ class SimulatorView(QMainWindow):
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # Write to the output file
-            out.write(frame)
+            output.write(frame)
 
-            # Display recording screen
+            # Display recording screen window
             cv2.imshow("Recording.. ('Q' to stop)", frame)
 
             # Wait for keystroke 'q' or stopPushButton to be clicked
@@ -466,16 +465,18 @@ class SimulatorView(QMainWindow):
                 self.stopPushButton.setDisabled(True)
                 break
 
-        # Release VideoWriter
-        out.release()
+        # Release VideoWriter object
+        output.release()
 
         # Close all windows
         cv2.destroyAllWindows()
 
+    # To view saved recording
     def viewRecording(self):
         path, ftype = QFileDialog.getOpenFileName(None, "View Video Recording", "./recordings/",
                                                   "Video Files (*.mp4)")
 
+        # Open file explorer according to path
         if path != "":
             os.startfile(path)
 
@@ -530,8 +531,7 @@ class SimulatorView(QMainWindow):
 
                 result = restart_dialog.exec_()
                 if result == QMessageBox.Ok:
-                    # Close program
-                    # exit()
+                    # Restart program in minimized
                     os.execl(sys.executable, sys.executable, *sys.argv)
 
             else:
@@ -563,17 +563,16 @@ class SimulatorView(QMainWindow):
             elif os.path.getsize(from_path) == 0:
                 self.selectedAlgoLabel.setText("Error! File is empty.")
 
+            # Copy file to folder
             else:
                 self.selectedAlgoLabel.setText("Added %s!" % fname)
                 shutil.copyfile(from_path, to_path)
 
+        # Reject non-python files
         else:
             self.selectedAlgoLabel.setText("Error! Invalid file type.")
 
-        """ Incomplete section
-        # Apply selected algorithm into simulation
-        """
-
+    # To start simulation based on evaluated function name of algorithm
     def startSimulation(self):
         self.adjustButtonBeforeSim()
 
@@ -581,11 +580,9 @@ class SimulatorView(QMainWindow):
         startSimFunction = eval("self.startSimulation_%s" % fname)
         startSimFunction()
 
-    """User-defined"""
+    """User-defined functions"""
     def startSimulation_Particle(self):
-        # Apply parameter values
-        self.num_robots = self.agentNumberSpinBox.value()
-        self.num_iterations = self.iterationSpinBox.value()
+        self.applyParameter()
 
         self.current_iteration = 0
         self.target = [300, 300]
@@ -602,13 +599,11 @@ class SimulatorView(QMainWindow):
             self.robots.append(robot)
 
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_robots_PSO)
+        self.timer.timeout.connect(self.update_robots_Particle)
         self.timer.start(self.simSpeedHoriSlider.value())
 
     def startSimulation_Firefly(self):
-        # Apply parameter values
-        self.num_robots = self.agentNumberSpinBox.value()
-        self.num_iterations = self.iterationSpinBox.value()
+        self.applyParameter()
 
         self.current_iteration = 0
         self.target = [300, 300]
@@ -626,10 +621,10 @@ class SimulatorView(QMainWindow):
             self.robots.append(robot)
 
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_robots_FA)
+        self.timer.timeout.connect(self.update_robots_Firefly)
         self.timer.start(self.simSpeedHoriSlider.value())
 
-    def update_robots_PSO(self):
+    def update_robots_Particle(self):
         global_best_fitness = float('inf')
         global_best_position = None
 
@@ -657,7 +652,7 @@ class SimulatorView(QMainWindow):
         self.displayCurrentIteration()
         self.current_iteration += 1
 
-    def update_robots_FA(self):
+    def update_robots_Firefly(self):
         global_best_fitness = 0
 
         for robot in self.robots:
@@ -714,6 +709,7 @@ class SimulatorView(QMainWindow):
 
         model_size = 15
 
+        # Draw robot positions based on saved positions with its respective iteration number
         for iterationNo in range(self.num_robots):
             x = self.pos_list[self.iterationSlider.sliderPosition()][iterationNo][0]
             y = self.pos_list[self.iterationSlider.sliderPosition()][iterationNo][1]
@@ -775,19 +771,19 @@ class SimulatorView(QMainWindow):
         self.iterationSlider.setDisabled(False)
         self.iterationSpinBox_2.setDisabled(False)
 
+    # To plot graphs
     def plotGraphs(self):
-        # Plot graphs
         iteration_list = list(range(0, self.current_iteration + 1))
 
         plt.plot(iteration_list, self.fitness_list)
         plt.xlabel('Iterations')
         plt.ylabel('Fitness value')
-        plt.title('Swarm Fitness vs. Iteration')
+        plt.title('Fitness against Iteration')
         plt.get_current_fig_manager().window.setGeometry(320, 190, 500, 500)
         plt.grid(linestyle='dotted')
         plt.show()
 
-    # Display current iteration
+    # To display current iteration
     def displayCurrentIteration(self):
         iterationText = self.scene.addText("Iteration: %s" % str(self.current_iteration))
         font = QFont()
@@ -795,14 +791,34 @@ class SimulatorView(QMainWindow):
         iterationText.setFont(font)
         iterationText.setPos(0, 0)
 
-    # Draw robot as a blue circle
+    # To draw robot as a blue circle
     def drawRobot(self, size, x, y):
         robot_color = QColor(Qt.blue)
         robot_brush = QBrush(robot_color)
 
         self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
 
-    # Draw target as a red circle
+    # To draw target as a red circle
     def drawTarget(self, size):
         target_brush = QBrush(Qt.red)
         self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
+
+    def applyParameter(self):
+        # Apply parameter values
+        self.num_robots = self.agentNumberSpinBox.value()
+        self.num_iterations = self.iterationSpinBox.value()
+
+    # Timer update function for simulation based on algorithm input
+    def startSimTimer(self):
+        # Initialize timer
+        self.timer = QTimer(self)
+
+        # Get selected algorithm name
+        fname = self.selectedAlgoLabel.text().split('.')[0]
+        updateSimFunction = eval("self.update_robots_%s" % fname)
+
+        # Connect simulator signal to timer, update signals based on timer
+        self.timer.timeout.connect(updateSimFunction)
+
+        # Adjust speed of simulation
+        self.timer.start(self.simSpeedHoriSlider.value())
