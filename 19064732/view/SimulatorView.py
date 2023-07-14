@@ -1,8 +1,9 @@
 """Reserve 3rd line to write import statement"""
 try:
-    from model.Firefly import Firefly
+    from model.Particle import Particle
 except ModuleNotFoundError:
     pass
+
 """"""
 
 import random
@@ -65,7 +66,7 @@ class SimulatorView(QMainWindow):
 
         """ parametersGroupBox """
         self.parametersGroupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
-        self.parametersGroupBox.setGeometry(QtCore.QRect(0, 170, 331, 131))
+        self.parametersGroupBox.setGeometry(QtCore.QRect(0, 170, 331, 151))
         self.parametersGroupBox.setMinimumSize(QtCore.QSize(331, 131))
         self.parametersGroupBox.setAutoFillBackground(True)
         self.parametersGroupBox.setObjectName("parametersGroupBox")
@@ -98,24 +99,16 @@ class SimulatorView(QMainWindow):
         self.iterationSpinBox.setObjectName("iterationSpinBox")
         self.iterationSpinBox.setMinimum(1)
         self.iterationSpinBox.setMaximum(100000)
-        self.iterationSpinBox.setValue(500)
+        self.iterationSpinBox.setValue(1000)
         self.horizontalLayout_2.addWidget(self.iterationSpinBox)
 
         self.formLayout_2.setLayout(1, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_2)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
 
-        self.velocityLabel = QtWidgets.QLabel(self.parametersGroupBox)
-        self.velocityLabel.setObjectName("velocityLabel")
-        self.horizontalLayout_3.addWidget(self.velocityLabel)
-
-        self.velocityDoubleSpinBox = QtWidgets.QDoubleSpinBox(self.parametersGroupBox)
-        self.velocityDoubleSpinBox.setObjectName("velocityDoubleSpinBox")
-        self.velocityDoubleSpinBox.setMinimum(10)
-        self.velocityDoubleSpinBox.setMaximum(1000)
-        self.horizontalLayout_3.addWidget(self.velocityDoubleSpinBox)
-
         self.formLayout_2.setLayout(2, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_3)
+
+        self.prevAlgo = None
 
         """ mapGroupBox """
         self.mapGroupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
@@ -169,7 +162,7 @@ class SimulatorView(QMainWindow):
         self.simSpeedHoriSlider.setGeometry(QtCore.QRect(80, 60, 160, 22))
         self.simSpeedHoriSlider.setOrientation(QtCore.Qt.Horizontal)
         self.simSpeedHoriSlider.setObjectName("simSpeedHoriSlider")
-        self.simSpeedHoriSlider.setMinimum(20)
+        self.simSpeedHoriSlider.setMinimum(10)
         self.simSpeedHoriSlider.setMaximum(250)
         self.simSpeedHoriSlider.setValue(250)
         self.simSpeedHoriSlider.setInvertedAppearance(True)
@@ -330,8 +323,6 @@ class SimulatorView(QMainWindow):
         mainWindow.setTabOrder(self.taskComboBox, self.algorithmToolButton)
         mainWindow.setTabOrder(self.algorithmToolButton, self.agentNumberSpinBox)
         mainWindow.setTabOrder(self.agentNumberSpinBox, self.iterationSpinBox)
-        mainWindow.setTabOrder(self.iterationSpinBox, self.velocityDoubleSpinBox)
-        mainWindow.setTabOrder(self.velocityDoubleSpinBox, self.mapComboBox)
         mainWindow.setTabOrder(self.mapComboBox, self.itemCheckBox)
         mainWindow.setTabOrder(self.itemCheckBox, self.simSpeedHoriSlider)
         mainWindow.setTabOrder(self.simSpeedHoriSlider, self.startPushButton)
@@ -371,7 +362,6 @@ class SimulatorView(QMainWindow):
         self.parametersGroupBox.setTitle(_translate("mainWindow", "Parameters"))
         self.agentNumberLabel.setText(_translate("mainWindow", "Number of agents:"))
         self.iterationLabel.setText(_translate("mainWindow", "Iterations:"))
-        self.velocityLabel.setText(_translate("mainWindow", "Velocity:"))
         self.mapGroupBox.setTitle(_translate("mainWindow", "Map Design"))
         self.mapLabel.setText(_translate("mainWindow", "Map:"))
         self.mapComboBox.setItemText(0, _translate("mainWindow", "Map Design 1"))
@@ -485,6 +475,7 @@ class SimulatorView(QMainWindow):
     def selectAlgorithm(self):
         path, ftype = QFileDialog.getOpenFileName(None, "Select a Swarm Algorithm", "./model/", "PY Files (*.py)")
 
+        # Check if path is not empty
         if path != '':
             # Get file name
             fname = path.split("/")[-1]       # Particle.py
@@ -505,10 +496,12 @@ class SimulatorView(QMainWindow):
                     elif os.path.getsize(path) == 0:
                         self.selectedAlgoLabel.setText("Error! File is empty.")
 
+                    # Copy file to folder
                     else:
                         self.selectedAlgoLabel.setText("Added %s!" % fname)
                         shutil.copyfile(path, to_path)
 
+                # Reject non-py files
                 else:
                     self.selectedAlgoLabel.setText("Error! Invalid file type.")
 
@@ -536,8 +529,13 @@ class SimulatorView(QMainWindow):
                     os.execl(sys.executable, sys.executable, *sys.argv)
 
             else:
-
                 self.startSimPushButton.setDisabled(False)
+
+                # Check if algorithm is already selected
+                if fname == self.prevAlgo:
+                    return
+
+                self.prevAlgo = fname
                 self.selectedAlgoLabel.setText(fname)
 
                 # Update parameter ui dynamically
@@ -545,7 +543,7 @@ class SimulatorView(QMainWindow):
                 robotString = "%s(None,None)" %fname
                 robot = eval(robotString)
 
-                # Start from row 3, increment for each parameter
+                # Start from row 3, increment for each number of parameters
                 row = 3
                 for parameter in robot.parameters:
                     hLayout = QtWidgets.QHBoxLayout()
@@ -557,8 +555,11 @@ class SimulatorView(QMainWindow):
 
                     parameterDoubleSpinBox = QtWidgets.QDoubleSpinBox(self.parametersGroupBox)
                     setattr(self, "doubleSpinBox_%s" % parameter, parameterDoubleSpinBox)
-                    parameterDoubleSpinBox.setMinimum(0.1)
-                    parameterDoubleSpinBox.setMaximum(1)
+
+                    parameterDoubleSpinBox.setMinimum(0.01)
+                    parameterDoubleSpinBox.setMaximum(10.00)
+                    parameterDoubleSpinBox.setValue(0.8)    # Set default value
+
                     hLayout.addWidget(parameterDoubleSpinBox)
 
                     self.formLayout_2.setLayout(row, QtWidgets.QFormLayout.LabelRole, hLayout)
@@ -566,6 +567,7 @@ class SimulatorView(QMainWindow):
                     _translate = QtCore.QCoreApplication.translate
                     parameterLabel.setText(_translate("mainWindow", "%s:" % parameter))
 
+                    # Increment to next row
                     row += 1
 
     # To get path of dragged algorithm files
@@ -658,6 +660,9 @@ class SimulatorView(QMainWindow):
         globalBestFitness = float('inf')
         globalBestPosition = None
 
+        parameterWeightList = self.getDynamicParameterValues()
+
+        # Update robot positions
         for robot in self.robots:
             fitness = robot.evaluateFitness(self.target)
             robot.updateBestPosition(fitness)
@@ -666,7 +671,7 @@ class SimulatorView(QMainWindow):
                 globalBestFitness = fitness
                 globalBestPosition = robot.position.copy()
 
-            robot.updatePosition(globalBestPosition, 0.7, 1.2, 1)
+            robot.updatePosition(globalBestPosition, inertiaWeight=parameterWeightList[0], cognitiveWeight=parameterWeightList[1], socialWeight=parameterWeightList[2])
             robot.move()
 
         self.savePositions()
@@ -685,16 +690,19 @@ class SimulatorView(QMainWindow):
     def updateRobots_Firefly(self):
         globalBestFitness = 0
 
+        parameterWeightList = self.getDynamicParameterValues()
+
         for robot in self.robots:
             robot.evaluateFitness(self.target)
 
             if robot.fitness > globalBestFitness:
                 globalBestFitness = robot.fitness
 
+        # Update robot positions
         for robot in self.robots:
             for otherFirefly in self.robots:
                 if robot.fitness < otherFirefly.fitness:
-                    robot.updatePosition(otherFirefly, attractiveness=1, stepSize=0.5)
+                    robot.updatePosition(otherFirefly, attractiveness=parameterWeightList[0], stepSize=parameterWeightList[1])
 
         for robot in self.robots:
             robot.move()
@@ -858,3 +866,16 @@ class SimulatorView(QMainWindow):
 
         # Adjust speed of simulation
         self.timer.start(self.simSpeedHoriSlider.value())
+
+    # To get dynamic parameter values in a list
+    def getDynamicParameterValues(self):
+        fname = self.selectedAlgoLabel.text().split('.')[0]
+        robotString = "%s(None,None)" % fname
+        robot = eval(robotString)
+
+        parameterWeightList = []
+        for parameter in robot.parameters:
+            parameterValue = getattr(self, f"doubleSpinBox_{parameter}").value()
+            parameterWeightList.append(parameterValue)
+
+        return parameterWeightList
