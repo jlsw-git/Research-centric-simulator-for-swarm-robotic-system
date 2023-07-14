@@ -3,6 +3,7 @@ try:
     from model.Particle import Particle
 except ModuleNotFoundError:
     pass
+""""""
 
 import random
 import os
@@ -168,7 +169,7 @@ class SimulatorView(QMainWindow):
         self.simSpeedHoriSlider.setGeometry(QtCore.QRect(80, 60, 160, 22))
         self.simSpeedHoriSlider.setOrientation(QtCore.Qt.Horizontal)
         self.simSpeedHoriSlider.setObjectName("simSpeedHoriSlider")
-        self.simSpeedHoriSlider.setMinimum(50)
+        self.simSpeedHoriSlider.setMinimum(20)
         self.simSpeedHoriSlider.setMaximum(250)
         self.simSpeedHoriSlider.setValue(250)
         self.simSpeedHoriSlider.setInvertedAppearance(True)
@@ -490,7 +491,7 @@ class SimulatorView(QMainWindow):
             fname_only = fname.split('.')[0]  # Particle
             ext = fname.split('.')[-1]        # py
             to_path = "./model/%s" % fname
-            import_statement = '    from model.%s import %s\n' % (fname_only, fname_only)
+            importStatement = '    from model.%s import %s\n' % (fname_only, fname_only)
 
             # Check if file exists in model folder
             if not (os.path.exists(to_path)):
@@ -516,8 +517,8 @@ class SimulatorView(QMainWindow):
                 lines = file.readlines()
 
             # Check if the import already exists
-            if import_statement not in lines:
-                lines[2] = import_statement
+            if importStatement not in lines:
+                lines[2] = importStatement
 
                 # Write import statement into this file
                 with open('./view/SimulatorView.py', 'w') as file:
@@ -548,25 +549,25 @@ class SimulatorView(QMainWindow):
     # To accept path of dropped algorithm files
     def dropEvent(self, event):
         files = [u.toLocalFile() for u in event.mimeData().urls()]
-        from_path = files[0]  # C:/Users/user/Desktop/19064732/model/sample.py
-        fname = from_path.split('/')[-1]  # sample.py
+        fromPath = files[0]  # C:/Users/user/Desktop/19064732/model/sample.py
+        fname = fromPath.split('/')[-1]  # sample.py
         ext = fname.split('.')[-1]  # py
-        to_path = "./model/%s" %fname
+        toPath = "./model/%s" %fname
 
         # If file type is .py, add to model folder
         if ext == 'py':
             # Check if file name already exists
-            if os.path.exists(to_path):
+            if os.path.exists(toPath):
                 self.selectedAlgoLabel.setText("Error! File already exists.")
 
             # Check if file is empty
-            elif os.path.getsize(from_path) == 0:
+            elif os.path.getsize(fromPath) == 0:
                 self.selectedAlgoLabel.setText("Error! File is empty.")
 
             # Copy file to folder
             else:
                 self.selectedAlgoLabel.setText("Added %s!" % fname)
-                shutil.copyfile(from_path, to_path)
+                shutil.copyfile(fromPath, toPath)
 
         # Reject non-python files
         else:
@@ -584,141 +585,141 @@ class SimulatorView(QMainWindow):
     def startSimulation_Particle(self):
         self.applyParameter()
 
-        self.current_iteration = 0
+        self.currentIteration = 0
         self.target = [300, 300]
         self.robots = []
-        self.fitness_list = []
-        self.fitness_threshold = 0.005
+        self.fitnessList = []
+        self.fitnessThreshold = 0.005
 
-        self.pos_list = []
+        self.posList = []
 
-        for _ in range(self.num_robots):
+        for _ in range(self.numRobots):
             x = random.randint(0, 600)
             y = random.randint(0, 600)
             robot = Particle(x, y)
             self.robots.append(robot)
 
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_robots_Particle)
+        self.timer.timeout.connect(self.updateRobots_Particle)
         self.timer.start(self.simSpeedHoriSlider.value())
 
     def startSimulation_Firefly(self):
         self.applyParameter()
 
-        self.current_iteration = 0
+        self.currentIteration = 0
         self.target = [300, 300]
         self.robots = []
-        self.fitness_list = []
-        self.fitness_threshold = 0.2
+        self.fitnessList = []
+        self.fitnessThreshold = 0.2
 
-        self.pos_list = []
+        self.posList = []
 
         # Initialize population
-        for _ in range(self.num_robots):
+        for _ in range(self.numRobots):
             x = random.uniform(-10, 10)
             y = random.uniform(-10, 10)
             robot = Firefly(x, y)
             self.robots.append(robot)
 
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_robots_Firefly)
+        self.timer.timeout.connect(self.updateRobots_Firefly)
         self.timer.start(self.simSpeedHoriSlider.value())
 
-    def update_robots_Particle(self):
-        global_best_fitness = float('inf')
-        global_best_position = None
+    def updateRobots_Particle(self):
+        globalBestFitness = float('inf')
+        globalBestPosition = None
 
         for robot in self.robots:
-            fitness = robot.evaluate_fitness(self.target)
-            robot.update_best_position(fitness)
+            fitness = robot.evaluateFitness(self.target)
+            robot.updateBestPosition(fitness)
 
-            if fitness < global_best_fitness:
-                global_best_fitness = fitness
-                global_best_position = robot.position.copy()
+            if fitness < globalBestFitness:
+                globalBestFitness = fitness
+                globalBestPosition = robot.position.copy()
 
-            robot.update_position(global_best_position, 0.7, 1.2, 1)
+            robot.updatePosition(globalBestPosition, 0.7, 1.2, 1)
             robot.move()
 
         self.savePositions()
-        self.draw_scene()
+        self.drawScene()
         self.simulationGraphicsView.viewport().update()
-        self.fitness_list.append(global_best_fitness)
+        self.fitnessList.append(globalBestFitness)
 
         # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
-        if global_best_fitness < self.fitness_threshold or self.current_iteration >= self.num_iterations:
+        if globalBestFitness < self.fitnessThreshold or self.currentIteration >= self.numIterations:
             self.adjustButtonAfterSim()
             self.plotGraphs()
 
         self.displayCurrentIteration()
-        self.current_iteration += 1
+        self.currentIteration += 1
 
-    def update_robots_Firefly(self):
-        global_best_fitness = 0
-
-        for robot in self.robots:
-            robot.evaluate_fitness(self.target)
-
-            if robot.fitness > global_best_fitness:
-                global_best_fitness = robot.fitness
+    def updateRobots_Firefly(self):
+        globalBestFitness = 0
 
         for robot in self.robots:
-            for other_firefly in self.robots:
-                if robot.fitness < other_firefly.fitness:
-                    robot.update_position(other_firefly, attractiveness=1, step_size=0.5)
+            robot.evaluateFitness(self.target)
+
+            if robot.fitness > globalBestFitness:
+                globalBestFitness = robot.fitness
+
+        for robot in self.robots:
+            for otherFirefly in self.robots:
+                if robot.fitness < otherFirefly.fitness:
+                    robot.updatePosition(otherFirefly, attractiveness=1, stepSize=0.5)
 
         for robot in self.robots:
             robot.move()
 
         self.savePositions()
-        self.draw_scene()
+        self.drawScene()
         self.simulationGraphicsView.viewport().update()
-        self.fitness_list.append(global_best_fitness)
+        self.fitnessList.append(globalBestFitness)
 
         # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
-        if global_best_fitness > self.fitness_threshold or self.current_iteration >= self.num_iterations:
+        if globalBestFitness > self.fitnessThreshold or self.currentIteration >= self.numIterations:
             self.adjustButtonAfterSim()
             self.plotGraphs()
 
         self.displayCurrentIteration()
-        self.current_iteration += 1
+        self.currentIteration += 1
 
     """"""
 
-    def draw_scene(self):
+    def drawScene(self):
         self.scene.clear()
         self.simulationGraphicsView.viewport().update()
 
-        model_size = 15
+        modelSize = 15
 
         for robot in self.robots:
             x = robot.position[0]
             y = robot.position[1]
 
-            self.drawRobot(model_size, x, y)
+            self.drawRobot(modelSize, x, y)
 
-        self.drawTarget(model_size)
+        self.drawTarget(modelSize)
 
     def savePositions(self):
         pos = [robot.position.copy() for robot in self.robots]
-        self.pos_list.append(pos)
+        self.posList.append(pos)
 
     def displayPosition(self):
         self.scene.clear()
         self.simulationGraphicsView.viewport().update()
         self.iterationSpinBox_2.setValue(self.iterationSlider.sliderPosition())
 
-        model_size = 15
+        modelSize = 15
 
         # Draw robot positions based on saved positions with its respective iteration number
-        for iterationNo in range(self.num_robots):
-            x = self.pos_list[self.iterationSlider.sliderPosition()][iterationNo][0]
-            y = self.pos_list[self.iterationSlider.sliderPosition()][iterationNo][1]
+        for iterationNo in range(self.numRobots):
+            x = self.posList[self.iterationSlider.sliderPosition()][iterationNo][0]
+            y = self.posList[self.iterationSlider.sliderPosition()][iterationNo][1]
 
-            self.displayCurrentIteration()
+            self.displayCurrentIterationSlider()
 
-            self.drawRobot(model_size, x, y)
+            self.drawRobot(modelSize, x, y)
 
-        self.drawTarget(model_size)
+        self.drawTarget(modelSize)
 
     def adjustIterationSlider(self):
         self.iterationSlider.setSliderPosition(self.iterationSpinBox_2.value())
@@ -763,19 +764,19 @@ class SimulatorView(QMainWindow):
         self.iterationSpinBox_2.setDisabled(False)
 
         self.startSimPushButton.setDisabled(False)
-        self.finalIterationLabel.setText(str(self.current_iteration))
-        self.iterationSlider.setMaximum(self.current_iteration)
-        self.iterationSpinBox_2.setMaximum(self.current_iteration)
-        self.iterationSlider.setValue(self.current_iteration)
-        self.iterationSpinBox_2.setValue(self.current_iteration)
+        self.finalIterationLabel.setText(str(self.currentIteration))
+        self.iterationSlider.setMaximum(self.currentIteration)
+        self.iterationSpinBox_2.setMaximum(self.currentIteration)
+        self.iterationSlider.setValue(self.currentIteration)
+        self.iterationSpinBox_2.setValue(self.currentIteration)
         self.iterationSlider.setDisabled(False)
         self.iterationSpinBox_2.setDisabled(False)
 
     # To plot graphs
     def plotGraphs(self):
-        iteration_list = list(range(0, self.current_iteration + 1))
+        iterationList = list(range(0, self.currentIteration + 1))
 
-        plt.plot(iteration_list, self.fitness_list)
+        plt.plot(iterationList, self.fitnessList)
         plt.xlabel('Iterations')
         plt.ylabel('Fitness value')
         plt.title('Fitness against Iteration')
@@ -785,7 +786,14 @@ class SimulatorView(QMainWindow):
 
     # To display current iteration
     def displayCurrentIteration(self):
-        iterationText = self.scene.addText("Iteration: %s" % str(self.current_iteration))
+        iterationText = self.scene.addText("Iteration: %s" % str(self.currentIteration))
+        font = QFont()
+        font.setPointSize(20)
+        iterationText.setFont(font)
+        iterationText.setPos(0, 0)
+
+    def displayCurrentIterationSlider(self):
+        iterationText = self.scene.addText("Iteration: %s" % str(self.iterationSlider.value()))
         font = QFont()
         font.setPointSize(20)
         iterationText.setFont(font)
@@ -793,20 +801,19 @@ class SimulatorView(QMainWindow):
 
     # To draw robot as a blue circle
     def drawRobot(self, size, x, y):
-        robot_color = QColor(Qt.blue)
-        robot_brush = QBrush(robot_color)
+        robotBrush = QBrush(QColor(Qt.blue))
 
-        self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robot_brush)
+        self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robotBrush)
 
     # To draw target as a red circle
     def drawTarget(self, size):
-        target_brush = QBrush(Qt.red)
-        self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=target_brush)
+        targetBrush = QBrush(Qt.red)
+        self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=targetBrush)
 
     def applyParameter(self):
         # Apply parameter values
-        self.num_robots = self.agentNumberSpinBox.value()
-        self.num_iterations = self.iterationSpinBox.value()
+        self.numRobots = self.agentNumberSpinBox.value()
+        self.numIterations = self.iterationSpinBox.value()
 
     # Timer update function for simulation based on algorithm input
     def startSimTimer(self):

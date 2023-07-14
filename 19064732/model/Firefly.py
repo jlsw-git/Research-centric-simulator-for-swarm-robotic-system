@@ -11,15 +11,13 @@ class Firefly:
         self.position[0] += random.uniform(-10, 10)
         self.position[1] += random.uniform(-10, 10)
 
-    def update_position(self, other_firefly, attractiveness, step_size):
-        distance = math.sqrt((self.position[0] - other_firefly.position[0])**2 + (self.position[1] - other_firefly.position[1])**2)
-        attractiveness_factor = attractiveness / (1 + distance**2)
-        random_step = random.uniform(-step_size, step_size)
+    def updatePosition(self, otherFirefly, attractiveness, stepSize):
+        distance = math.sqrt((self.position[0] - otherFirefly.position[0])**2 + (self.position[1] - otherFirefly.position[1])**2)
+        attractivenessFactor = attractiveness / (1 + distance**2)
+        randomStep = random.uniform(-stepSize, stepSize)
 
-        self.position[0] = self.position[0] + attractiveness_factor * (other_firefly.position[0] - self.position[0]) + random_step
-        self.position[1] = self.position[1] + attractiveness_factor * (other_firefly.position[1] - self.position[1]) + random_step
+        self.position[0] = self.position[0] + attractivenessFactor * (otherFirefly.position[0] - self.position[0]) + randomStep
+        self.position[1] = self.position[1] + attractivenessFactor * (otherFirefly.position[1] - self.position[1]) + randomStep
 
-    def evaluate_fitness(self, target):
-        # fitness = math.sqrt((self.position[0] - target[0])**2 + (self.position[1] - target[1])**2)
-        # self.best_fitness = 1 / (1 + fitness)  # Inverse of distance as intensity
+    def evaluateFitness(self, target):
         self.fitness = 1 / (1 + (math.sqrt((self.position[0] - target[0])**2 + (self.position[1] - target[1])**2)))
