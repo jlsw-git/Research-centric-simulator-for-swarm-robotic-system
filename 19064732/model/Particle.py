@@ -8,6 +8,7 @@ class Particle:
         self.velocity = [random.uniform(-1, 1), random.uniform(-1, 1)]
         self.bestPosition = self.position.copy()
         self.bestFitness = float('inf')
+        self.parameters = {'Inertia', 'Cognitive', 'Social'}
 
     def move(self):
         self.position[0] += self.velocity[0]

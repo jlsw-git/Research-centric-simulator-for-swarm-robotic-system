@@ -1,6 +1,6 @@
 """Reserve 3rd line to write import statement"""
 try:
-    from model.Particle import Particle
+    from model.Firefly import Firefly
 except ModuleNotFoundError:
     pass
 """"""
@@ -530,14 +530,43 @@ class SimulatorView(QMainWindow):
                 restart_dialog.setWindowTitle("Swarm Robotics Simulator")
                 restart_dialog.setStandardButtons(QMessageBox.Ok)
 
+                # Restart program in minimized
                 result = restart_dialog.exec_()
                 if result == QMessageBox.Ok:
-                    # Restart program in minimized
                     os.execl(sys.executable, sys.executable, *sys.argv)
 
             else:
+
                 self.startSimPushButton.setDisabled(False)
                 self.selectedAlgoLabel.setText(fname)
+
+                # Update parameter ui dynamically
+                fname = self.selectedAlgoLabel.text().split('.')[0]
+                robotString = "%s(None,None)" %fname
+                robot = eval(robotString)
+
+                # Start from row 3, increment for each parameter
+                row = 3
+                for parameter in robot.parameters:
+                    hLayout = QtWidgets.QHBoxLayout()
+                    setattr(self, "horizontalLayout_%s" % parameter, hLayout)
+
+                    parameterLabel = QtWidgets.QLabel(self.parametersGroupBox)
+                    setattr(self, "label_%s" % parameter, parameterLabel)
+                    hLayout.addWidget(parameterLabel)
+
+                    parameterDoubleSpinBox = QtWidgets.QDoubleSpinBox(self.parametersGroupBox)
+                    setattr(self, "doubleSpinBox_%s" % parameter, parameterDoubleSpinBox)
+                    parameterDoubleSpinBox.setMinimum(0.1)
+                    parameterDoubleSpinBox.setMaximum(1)
+                    hLayout.addWidget(parameterDoubleSpinBox)
+
+                    self.formLayout_2.setLayout(row, QtWidgets.QFormLayout.LabelRole, hLayout)
+
+                    _translate = QtCore.QCoreApplication.translate
+                    parameterLabel.setText(_translate("mainWindow", "%s:" % parameter))
+
+                    row += 1
 
     # To get path of dragged algorithm files
     def dragEnterEvent(self, event):

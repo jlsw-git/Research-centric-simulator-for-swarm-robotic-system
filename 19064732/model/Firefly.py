@@ -6,6 +6,7 @@ class Firefly:
     def __init__(self, x, y):
         self.position = [x, y]
         self.fitness = float('inf')
+        self.parameters = {'Attractiveness', 'Step Size'}
 
     def move(self):
         self.position[0] += random.uniform(-10, 10)
