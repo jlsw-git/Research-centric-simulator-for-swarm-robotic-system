@@ -617,44 +617,47 @@ class SimulatorView(QMainWindow):
         self.applyParameter()
 
         self.currentIteration = 0
-        self.target = [300, 300]
         self.robots = []
         self.fitnessList = []
-        self.fitnessThreshold = 0.005
-
         self.posList = []
 
+        self.target = [300, 300]        # Set target location
+        self.fitnessThreshold = 0.005   # Set fitness threshold
+
         for _ in range(self.numRobots):
-            x = random.randint(0, 600)
+            # Set range of values for robot movement
+            x = random.randint(0, 600)  # Set range of value for movement
             y = random.randint(0, 600)
-            robot = Particle(x, y)
+            fname = self.selectedAlgoLabel.text().split('.')[0]
+            robotString = "%s(x, y)" % fname
+            robot = eval(robotString)
             self.robots.append(robot)
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.updateRobots_Particle)
-        self.timer.start(self.simSpeedHoriSlider.value())
+        # Start timer and update according to updateRobot function
+        self.startSimTimer()
 
     def startSimulation_Firefly(self):
         self.applyParameter()
 
         self.currentIteration = 0
-        self.target = [300, 300]
         self.robots = []
         self.fitnessList = []
-        self.fitnessThreshold = 0.2
-
         self.posList = []
 
-        # Initialize population
+        self.target = [300, 300]        # Set target location
+        self.fitnessThreshold = 0.2     # Set fitness threshold
+
         for _ in range(self.numRobots):
+            # Set range of values for robot movement
             x = random.uniform(-10, 10)
             y = random.uniform(-10, 10)
-            robot = Firefly(x, y)
+            fname = self.selectedAlgoLabel.text().split('.')[0]
+            robotString = "%s(x, y)" % fname
+            robot = eval(robotString)
             self.robots.append(robot)
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.updateRobots_Firefly)
-        self.timer.start(self.simSpeedHoriSlider.value())
+        # Start timer and update according to updateRobot function
+        self.startSimTimer()
 
     def updateRobots_Particle(self):
         globalBestFitness = float('inf')
@@ -720,7 +723,23 @@ class SimulatorView(QMainWindow):
         self.displayCurrentIteration()
         self.currentIteration += 1
 
+
     """"""
+
+    # Timer update function for simulation based on algorithm input
+    def startSimTimer(self):
+        # Initialize timer
+        self.timer = QTimer(self)
+
+        # Get selected algorithm name and its respective update function
+        fname = self.selectedAlgoLabel.text().split('.')[0]
+        updateSimFunction = getattr(self, f"updateRobots_{fname}")      # e.g. self.updateRobots_Particle
+
+        # Connect simulator signal to timer, update signals based on speed
+        self.timer.timeout.connect(updateSimFunction)
+
+        # Adjust speed of simulation in according to milliseconds (e.g. 50ms means signals to update every 50ms)
+        self.timer.start(self.simSpeedHoriSlider.value())
 
     def drawScene(self):
         self.scene.clear()
@@ -851,21 +870,6 @@ class SimulatorView(QMainWindow):
         # Apply parameter values
         self.numRobots = self.agentNumberSpinBox.value()
         self.numIterations = self.iterationSpinBox.value()
-
-    # Timer update function for simulation based on algorithm input
-    def startSimTimer(self):
-        # Initialize timer
-        self.timer = QTimer(self)
-
-        # Get selected algorithm name
-        fname = self.selectedAlgoLabel.text().split('.')[0]
-        updateSimFunction = eval("self.update_robots_%s" % fname)
-
-        # Connect simulator signal to timer, update signals based on timer
-        self.timer.timeout.connect(updateSimFunction)
-
-        # Adjust speed of simulation
-        self.timer.start(self.simSpeedHoriSlider.value())
 
     # To get dynamic parameter values in a list
     def getDynamicParameterValues(self):
