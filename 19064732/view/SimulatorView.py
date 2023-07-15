@@ -1,6 +1,5 @@
 """Reserve line 3 for program to write import statement, by default set as pass"""
 try:
-    pass
 except ModuleNotFoundError:
     pass
 
@@ -317,10 +316,6 @@ class SimulatorView(QMainWindow):
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 1280, 21))
         self.menuBar.setObjectName("menuBar")
         mainWindow.setMenuBar(self.menuBar)
-
-        self.statusBar = QtWidgets.QStatusBar(mainWindow)
-        self.statusBar.setObjectName("statusBar")
-        mainWindow.setStatusBar(self.statusBar)
 
         self.retranslateUi(mainWindow)
         QtCore.QMetaObject.connectSlotsByName(mainWindow)
