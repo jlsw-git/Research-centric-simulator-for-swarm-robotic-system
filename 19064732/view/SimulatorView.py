@@ -1,6 +1,6 @@
-"""Reserve 3rd line to write import statement"""
+"""Reserve line 3 for program to write import statement, by default set as pass"""
 try:
-    from model.Particle import Particle
+    pass
 except ModuleNotFoundError:
     pass
 
@@ -86,6 +86,7 @@ class SimulatorView(QMainWindow):
         self.agentNumberSpinBox.setMinimum(1)
         self.agentNumberSpinBox.setMaximum(1000)
         self.agentNumberSpinBox.setValue(100)
+        self.agentNumberSpinBox.setSingleStep(10)
         self.horizontalLayout.addWidget(self.agentNumberSpinBox)
 
         self.formLayout_2.setLayout(0, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout)
@@ -101,6 +102,7 @@ class SimulatorView(QMainWindow):
         self.iterationSpinBox.setMinimum(1)
         self.iterationSpinBox.setMaximum(100000)
         self.iterationSpinBox.setValue(1000)
+        self.iterationSpinBox.setSingleStep(100)
         self.horizontalLayout_2.addWidget(self.iterationSpinBox)
 
         self.formLayout_2.setLayout(1, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_2)
@@ -219,6 +221,7 @@ class SimulatorView(QMainWindow):
 
         self.loadPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
         self.loadPushButton.setObjectName("loadPushButton")
+        self.loadPushButton.setDisabled(True)
         self.horizontalLayout_5.addWidget(self.loadPushButton)
 
         self.resetPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
@@ -336,19 +339,19 @@ class SimulatorView(QMainWindow):
         mainWindow.setTabOrder(self.scrollArea, self.simulationGraphicsView)
 
         """ Button Connections """
-        # startPushButton - Start Video Recording
+        # startPushButton - Start video recording
         self.startPushButton.clicked.connect(self.startRecord)
 
-        # viewRecPushButton - View Video Recording
+        # viewRecPushButton - View video recording
         self.viewRecPushButton.clicked.connect(self.viewRecording)
 
-        # startSimPushButton - Start Simulation
+        # startSimPushButton - Start simulation
         self.startSimPushButton.clicked.connect(self.startSimulation)
 
-        # algorithmToolButton - Select Algorithm from Local Files
+        # algorithmToolButton - Select algorithm from local files
         self.algorithmToolButton.clicked.connect(self.selectAlgorithm)
 
-        # resetPushButton - Reset simulation
+        # resetPushButton - Reset simulation canvas and close plots
         self.resetPushButton.clicked.connect(self.resetScene)
 
         # iterationSlider - Adjust visualization according to iteration slider
@@ -479,7 +482,7 @@ class SimulatorView(QMainWindow):
     def selectAlgorithm(self):
         path, ftype = QFileDialog.getOpenFileName(None, "Select a Swarm Algorithm", "./model/", "PY Files (*.py)")
 
-        # Check if path is not empty
+        # Check if user cancelled algorithm selection
         if path != '':
             # Get file name
             fname = path.split("/")[-1]       # Particle.py
@@ -535,6 +538,7 @@ class SimulatorView(QMainWindow):
 
             else:
                 self.startSimPushButton.setDisabled(False)
+                self.loadPushButton.setDisabled(False)
 
                 # Check if algorithm is already selected
                 if fname == self.prevAlgo:
@@ -545,10 +549,10 @@ class SimulatorView(QMainWindow):
 
                 # Update parameter ui dynamically
                 fname = self.selectedAlgoLabel.text().split('.')[0]
-                robotString = "%s(None,None)" %fname
+                robotString = "%s(None, None)" %fname
                 robot = eval(robotString)
 
-                # Start from row 3, increment for each number of parameters
+                # Start from row 3 of parameter group box, increment for each number of parameters
                 row = 3
                 for parameter in robot.parameters:
                     hLayout = QtWidgets.QHBoxLayout()
@@ -563,6 +567,7 @@ class SimulatorView(QMainWindow):
 
                     parameterDoubleSpinBox.setMinimum(0.01)
                     parameterDoubleSpinBox.setMaximum(10.00)
+                    parameterDoubleSpinBox.setSingleStep(0.1)
                     parameterDoubleSpinBox.setValue(0.8)    # Set default value
 
                     hLayout.addWidget(parameterDoubleSpinBox)
@@ -608,6 +613,7 @@ class SimulatorView(QMainWindow):
         # Reject non-python files
         else:
             self.selectedAlgoLabel.setText("Error! Invalid file type.")
+
 
     # To start simulation based on evaluated function name of algorithm
     def startSimulation(self):
@@ -842,7 +848,7 @@ class SimulatorView(QMainWindow):
         plt.plot(iterationList, self.fitnessList)
         plt.xlabel('Iterations')
         plt.ylabel('Fitness value')
-        plt.title('Fitness against Iteration')
+        plt.title('Swarm Fitness vs. Iteration')
         plt.get_current_fig_manager().window.setGeometry(320, 190, 500, 500)
         plt.grid(linestyle='dotted')
         plt.show()
@@ -873,6 +879,7 @@ class SimulatorView(QMainWindow):
         targetBrush = QBrush(Qt.red)
         self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=targetBrush)
 
+    # To apply base parameter values from simulator
     def applyParameter(self):
         # Apply parameter values
         self.numRobots = self.agentNumberSpinBox.value()
@@ -923,22 +930,22 @@ class SimulatorView(QMainWindow):
     def loadParameters(self):
         fromPath, ftype = QFileDialog.getOpenFileName(None, "Select a parameter file", "./parameters/", "JSON Files (*.json)")
 
-        # Check if path is not empty
+        # Check if user cancelled loading parameters
         if fromPath != '':
             # Load parameter file
             with open(fromPath, 'r') as file:
                 jsonParameters = json.load(file)
 
-        """ ====================================================================can implement matching or implement apply algorithm ======================================================================================================"""
-        # If matching with algorithm, apply parameters to simulator
-        self.agentNumberSpinBox.setValue(jsonParameters[0])
-        self.iterationSpinBox.setValue(jsonParameters[1])
+            # ====================================================================can still implement matching or implement apply algorithm ======================================================================================================"""
+            # If matching with algorithm, apply parameters to simulator
+            self.agentNumberSpinBox.setValue(jsonParameters[0])
+            self.iterationSpinBox.setValue(jsonParameters[1])
 
-        # Starting from 2 because index 0 and 1 are taken by number of agents and iterations
-        counter = 2
-        fname = self.selectedAlgoLabel.text().split('.')[0]
-        robotString = "%s(None,None)" % fname
-        robot = eval(robotString)
-        for parameter in robot.parameters:
-            getattr(self, f"doubleSpinBox_{parameter}").setValue(jsonParameters[counter])
-            counter += 1
+            # Starting from 2 because index 0 and 1 are taken by number of agents and iterations
+            counter = 2
+            fname = self.selectedAlgoLabel.text().split('.')[0]
+            robotString = "%s(None,None)" % fname
+            robot = eval(robotString)
+            for parameter in robot.parameters:
+                getattr(self, f"doubleSpinBox_{parameter}").setValue(jsonParameters[counter])
+                counter += 1
