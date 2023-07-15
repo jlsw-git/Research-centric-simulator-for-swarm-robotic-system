@@ -14,6 +14,7 @@ import shutil
 import numpy as np
 import pyautogui
 import matplotlib.pyplot as plt
+import json
 from datetime import date
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QBrush, QColor, QFont
@@ -356,6 +357,9 @@ class SimulatorView(QMainWindow):
         # iterationSpinBox_2 - Sync iteration spinbox to current slider value
         self.iterationSpinBox_2.valueChanged.connect(self.adjustIterationSlider)
 
+        # loadPushButton - Load saved parameters from json file
+        self.loadPushButton.clicked.connect(self.loadParameters)
+
     def retranslateUi(self, mainWindow):
         _translate = QtCore.QCoreApplication.translate
         mainWindow.setWindowTitle(_translate("mainWindow", "Swarm Robotics Simulator"))
@@ -518,13 +522,14 @@ class SimulatorView(QMainWindow):
                     file.writelines(lines)
 
                 # Display dialog to restart program
-                restart_dialog = QMessageBox()
-                restart_dialog.setText("Restart is required. App will restart minimised.")
-                restart_dialog.setWindowTitle("Swarm Robotics Simulator")
-                restart_dialog.setStandardButtons(QMessageBox.Ok)
+                restartDialog = QMessageBox()
+                restartDialog.setIcon(QMessageBox.Warning)
+                restartDialog.setText("Restart is required. App will restart minimised.")
+                restartDialog.setWindowTitle("Swarm Robotics Simulator")
+                restartDialog.setStandardButtons(QMessageBox.Ok)
 
                 # Restart program in minimized
-                result = restart_dialog.exec_()
+                result = restartDialog.exec_()
                 if result == QMessageBox.Ok:
                     os.execl(sys.executable, sys.executable, *sys.argv)
 
@@ -663,7 +668,7 @@ class SimulatorView(QMainWindow):
         globalBestFitness = float('inf')
         globalBestPosition = None
 
-        parameterWeightList = self.getDynamicParameterValues()
+        self.parameterWeightList = self.getDynamicParameterValues()
 
         # Update robot positions
         for robot in self.robots:
@@ -674,7 +679,7 @@ class SimulatorView(QMainWindow):
                 globalBestFitness = fitness
                 globalBestPosition = robot.position.copy()
 
-            robot.updatePosition(globalBestPosition, inertiaWeight=parameterWeightList[0], cognitiveWeight=parameterWeightList[1], socialWeight=parameterWeightList[2])
+            robot.updatePosition(globalBestPosition, inertiaWeight=self.parameterWeightList[0], cognitiveWeight=self.parameterWeightList[1], socialWeight=self.parameterWeightList[2])
             robot.move()
 
         self.savePositions()
@@ -684,6 +689,7 @@ class SimulatorView(QMainWindow):
 
         # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
         if globalBestFitness < self.fitnessThreshold or self.currentIteration >= self.numIterations:
+            self.saveParameters()
             self.adjustButtonAfterSim()
             self.plotGraphs()
 
@@ -693,7 +699,7 @@ class SimulatorView(QMainWindow):
     def updateRobots_Firefly(self):
         globalBestFitness = 0
 
-        parameterWeightList = self.getDynamicParameterValues()
+        self.parameterWeightList = self.getDynamicParameterValues()
 
         for robot in self.robots:
             robot.evaluateFitness(self.target)
@@ -705,7 +711,7 @@ class SimulatorView(QMainWindow):
         for robot in self.robots:
             for otherFirefly in self.robots:
                 if robot.fitness < otherFirefly.fitness:
-                    robot.updatePosition(otherFirefly, attractiveness=parameterWeightList[0], stepSize=parameterWeightList[1])
+                    robot.updatePosition(otherFirefly, attractiveness=self.parameterWeightList[0], stepSize=self.parameterWeightList[1])
 
         for robot in self.robots:
             robot.move()
@@ -717,6 +723,7 @@ class SimulatorView(QMainWindow):
 
         # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
         if globalBestFitness > self.fitnessThreshold or self.currentIteration >= self.numIterations:
+            self.saveParameters()
             self.adjustButtonAfterSim()
             self.plotGraphs()
 
@@ -732,8 +739,8 @@ class SimulatorView(QMainWindow):
         self.timer = QTimer(self)
 
         # Get selected algorithm name and its respective update function
-        fname = self.selectedAlgoLabel.text().split('.')[0]
-        updateSimFunction = getattr(self, f"updateRobots_{fname}")      # e.g. self.updateRobots_Particle
+        algoName = self.selectedAlgoLabel.text().split('.')[0]
+        updateSimFunction = getattr(self, f"updateRobots_{algoName}")      # e.g. self.updateRobots_Particle
 
         # Connect simulator signal to timer, update signals based on speed
         self.timer.timeout.connect(updateSimFunction)
@@ -883,3 +890,55 @@ class SimulatorView(QMainWindow):
             parameterWeightList.append(parameterValue)
 
         return parameterWeightList
+
+    def saveParameters(self):
+        # Prompt user in dialog if they want to save the parameters
+        saveParameterDialog = QMessageBox()
+        saveParameterDialog.setIcon(QMessageBox.Question)
+        saveParameterDialog.setText("Save current parameters?")
+        saveParameterDialog.setWindowTitle("Swarm Robotics Simulator")
+        saveParameterDialog.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+
+        yesNoResult = saveParameterDialog.exec_()
+        if yesNoResult == QMessageBox.Yes:
+            """Format: parameters = [Agents, Iterations, **any other parameters]"""
+            parameters = [self.agentNumberSpinBox.value(), self.iterationSpinBox.value()]
+            parameters = parameters + self.parameterWeightList
+
+            # Write to parameters folder as json file, with incrementing filename
+            counter = 0
+            algoName = self.selectedAlgoLabel.text().split('.')[0]
+
+            filename = "%s_parameters_%s.json" % (algoName, counter)
+            toPath = "./parameters/" + filename
+
+            while os.path.exists(toPath):
+                counter += 1
+                filename = "%s_parameters_%s.json" % (algoName, counter)
+                toPath = "./parameters/" + filename
+
+            with open(toPath, 'w') as file:
+                json.dump(parameters, file)
+
+    def loadParameters(self):
+        fromPath, ftype = QFileDialog.getOpenFileName(None, "Select a parameter file", "./parameters/", "JSON Files (*.json)")
+
+        # Check if path is not empty
+        if fromPath != '':
+            # Load parameter file
+            with open(fromPath, 'r') as file:
+                jsonParameters = json.load(file)
+
+        """ ====================================================================can implement matching or implement apply algorithm ======================================================================================================"""
+        # If matching with algorithm, apply parameters to simulator
+        self.agentNumberSpinBox.setValue(jsonParameters[0])
+        self.iterationSpinBox.setValue(jsonParameters[1])
+
+        # Starting from 2 because index 0 and 1 are taken by number of agents and iterations
+        counter = 2
+        fname = self.selectedAlgoLabel.text().split('.')[0]
+        robotString = "%s(None,None)" % fname
+        robot = eval(robotString)
+        for parameter in robot.parameters:
+            getattr(self, f"doubleSpinBox_{parameter}").setValue(jsonParameters[counter])
+            counter += 1
