@@ -1,5 +1,6 @@
 """Reserve line 3 for program to write import statement, by default set as pass"""
 try:
+    pass
 except ModuleNotFoundError:
     pass
 
@@ -225,6 +226,7 @@ class SimulatorView(QMainWindow):
 
         self.resetPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
         self.resetPushButton.setObjectName("resetPushButton")
+        self.resetPushButton.setDisabled(True)
         self.horizontalLayout_5.addWidget(self.resetPushButton)
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_5)
@@ -319,19 +321,6 @@ class SimulatorView(QMainWindow):
 
         self.retranslateUi(mainWindow)
         QtCore.QMetaObject.connectSlotsByName(mainWindow)
-        mainWindow.setTabOrder(self.taskComboBox, self.algorithmToolButton)
-        mainWindow.setTabOrder(self.algorithmToolButton, self.agentNumberSpinBox)
-        mainWindow.setTabOrder(self.agentNumberSpinBox, self.iterationSpinBox)
-        mainWindow.setTabOrder(self.mapComboBox, self.itemCheckBox)
-        mainWindow.setTabOrder(self.itemCheckBox, self.simSpeedHoriSlider)
-        mainWindow.setTabOrder(self.simSpeedHoriSlider, self.startPushButton)
-        mainWindow.setTabOrder(self.startPushButton, self.stopPushButton)
-        mainWindow.setTabOrder(self.stopPushButton, self.viewRecPushButton)
-        mainWindow.setTabOrder(self.viewRecPushButton, self.startSimPushButton)
-        mainWindow.setTabOrder(self.startSimPushButton, self.loadPushButton)
-        mainWindow.setTabOrder(self.loadPushButton, self.resetPushButton)
-        mainWindow.setTabOrder(self.resetPushButton, self.scrollArea)
-        mainWindow.setTabOrder(self.scrollArea, self.simulationGraphicsView)
 
         """ Button Connections """
         # startPushButton - Start video recording
@@ -399,17 +388,11 @@ class SimulatorView(QMainWindow):
     """ Object Event Functions """
     # To start recording of current screen
     def startRecord(self):
+        # Adjust recording buttons
         self.startPushButton.setDisabled(True)
         self.stopPushButton.setDisabled(False)
 
-        # Specify resolution of video
-        width, height = pyautogui.size()
-        res = (width, height)
-
-        # Specify video codec
-        codec = cv2.VideoWriter_fourcc(*"mp4v")
-
-        # Create new filename with incrementing number
+        # Create video filename with incrementing number for new videos
         counter = 0
         current_date = str(date.today())
         clean_date = current_date.replace("-", "")
@@ -421,8 +404,15 @@ class SimulatorView(QMainWindow):
             filename = "VID%s_%s.mp4" % (clean_date, counter)
             filepath = "./recordings/" + filename
 
+        # Specify video codec
+        codec = cv2.VideoWriter_fourcc(*"mp4v")
+
         # Specify frame rate
         fps = 20.0
+
+        # Specify resolution of video
+        width, height = pyautogui.size()
+        res = (width, height)
 
         # Create VideoWriter object
         output = cv2.VideoWriter(filepath, codec, fps, res)
@@ -436,6 +426,7 @@ class SimulatorView(QMainWindow):
         # Move window to top left corner
         cv2.moveWindow("Recording.. ('Q' to stop)", 0, 0)
 
+        # Loop to take screenshots and write to file
         while True:
             # Take screenshot using PyAutoGUI
             img = pyautogui.screenshot()
@@ -443,13 +434,13 @@ class SimulatorView(QMainWindow):
             # Convert the screenshot to numpy array
             frame = np.array(img)
 
-            # Convert from BGR(Blue, Green, Red) to RGB(Red, Green, Blue)
+            # Convert from BGR to RGB
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            # Write to the output file
+            # Write output to file
             output.write(frame)
 
-            # Display recording screen window
+            # Display recording window
             cv2.imshow("Recording.. ('Q' to stop)", frame)
 
             # Wait for keystroke 'q' or stopPushButton to be clicked
@@ -464,7 +455,7 @@ class SimulatorView(QMainWindow):
         # Close all windows
         cv2.destroyAllWindows()
 
-    # To view saved recording
+    # To view saved recordings
     def viewRecording(self):
         path, ftype = QFileDialog.getOpenFileName(None, "View Video Recording", "./recordings/",
                                                   "Video Files (*.mp4)")
@@ -507,11 +498,11 @@ class SimulatorView(QMainWindow):
                 else:
                     self.selectedAlgoLabel.setText("Error! Invalid file type.")
 
-            # Read the contents of the file
+            # Read each line of the file
             with open('./view/SimulatorView.py', 'r') as file:
                 lines = file.readlines()
 
-            # Check if the import already exists
+            # If import statement does not exist, write import statement to file and restart program
             if importStatement not in lines:
                 lines[2] = importStatement
 
@@ -531,14 +522,17 @@ class SimulatorView(QMainWindow):
                 if result == QMessageBox.Ok:
                     os.execl(sys.executable, sys.executable, *sys.argv)
 
+            # If import already exists, add dynamic parameters to ui
             else:
+                # Adjust buttons
                 self.startSimPushButton.setDisabled(False)
                 self.loadPushButton.setDisabled(False)
 
-                # Check if algorithm is already selected
+                # If algorithm is already selected, return
                 if fname == self.prevAlgo:
                     return
 
+                # Set prev algo name to current filename (default is None)
                 self.prevAlgo = fname
                 self.selectedAlgoLabel.setText(fname)
 
@@ -547,32 +541,40 @@ class SimulatorView(QMainWindow):
                 robotString = "%s(None, None)" %fname
                 robot = eval(robotString)
 
-                # Start from row 3 of parameter group box, increment for each number of parameters
+                # Add parameters from row 3 of parameter group box, increment row for each parameter
                 row = 3
                 for parameter in robot.parameters:
+                    # Create horizontal layout
                     hLayout = QtWidgets.QHBoxLayout()
                     setattr(self, "horizontalLayout_%s" % parameter, hLayout)
 
+                    # Create parameter label according to paraneter name
                     parameterLabel = QtWidgets.QLabel(self.parametersGroupBox)
                     setattr(self, "label_%s" % parameter, parameterLabel)
-                    hLayout.addWidget(parameterLabel)
 
+
+                    # Create double spin box for each parameter label
                     parameterDoubleSpinBox = QtWidgets.QDoubleSpinBox(self.parametersGroupBox)
                     setattr(self, "doubleSpinBox_%s" % parameter, parameterDoubleSpinBox)
 
+                    # Adjust default properties of spin boxes
                     parameterDoubleSpinBox.setMinimum(0.01)
-                    parameterDoubleSpinBox.setMaximum(10.00)
-                    parameterDoubleSpinBox.setSingleStep(0.1)
-                    parameterDoubleSpinBox.setValue(0.8)    # Set default value
+                    parameterDoubleSpinBox.setMaximum(1.50)
+                    parameterDoubleSpinBox.setSingleStep(0.10)
+                    parameterDoubleSpinBox.setValue(0.80)
 
+                    # Add components to layout
+                    hLayout.addWidget(parameterLabel)
                     hLayout.addWidget(parameterDoubleSpinBox)
 
+                    # Add components to respective row
                     self.formLayout_2.setLayout(row, QtWidgets.QFormLayout.LabelRole, hLayout)
 
+                    # Translate label text for main window
                     _translate = QtCore.QCoreApplication.translate
                     parameterLabel.setText(_translate("mainWindow", "%s:" % parameter))
 
-                    # Increment to next row
+                    # Increment row for next parameter
                     row += 1
 
     # To get path of dragged algorithm files
@@ -609,8 +611,7 @@ class SimulatorView(QMainWindow):
         else:
             self.selectedAlgoLabel.setText("Error! Invalid file type.")
 
-
-    # To start simulation based on evaluated function name of algorithm
+    # To start simulation based on evaluated name of user-defined function
     def startSimulation(self):
         self.adjustButtonBeforeSim()
 
@@ -685,11 +686,11 @@ class SimulatorView(QMainWindow):
 
         self.savePositions()
         self.drawScene()
-        self.simulationGraphicsView.viewport().update()
         self.fitnessList.append(globalBestFitness)
 
         # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
         if globalBestFitness < self.fitnessThreshold or self.currentIteration >= self.numIterations:
+            self.timer.stop()
             self.saveParameters()
             self.adjustButtonAfterSim()
             self.plotGraphs()
@@ -719,11 +720,11 @@ class SimulatorView(QMainWindow):
 
         self.savePositions()
         self.drawScene()
-        self.simulationGraphicsView.viewport().update()
         self.fitnessList.append(globalBestFitness)
 
         # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
         if globalBestFitness > self.fitnessThreshold or self.currentIteration >= self.numIterations:
+            self.timer.stop()
             self.saveParameters()
             self.adjustButtonAfterSim()
             self.plotGraphs()
@@ -739,14 +740,14 @@ class SimulatorView(QMainWindow):
         # Initialize timer
         self.timer = QTimer(self)
 
-        # Get selected algorithm name and its respective update function
+        # Get algorithm name and its respective update function
         algoName = self.selectedAlgoLabel.text().split('.')[0]
-        updateSimFunction = getattr(self, f"updateRobots_{algoName}")      # e.g. self.updateRobots_Particle
+        self.updateSimFunction = getattr(self, f"updateRobots_{algoName}")      # e.g. self.updateRobots_Particle
 
-        # Connect simulator signal to timer, update signals based on speed
-        self.timer.timeout.connect(updateSimFunction)
+        # Connect simulator signal to timer, update signals based on speed value
+        self.timer.timeout.connect(self.updateSimFunction)
 
-        # Adjust speed of simulation in according to milliseconds (e.g. 50ms means signals to update every 50ms)
+        # Set speed of simulation according to specified value (e.g. 50 means update function signal every 50ms)
         self.timer.start(self.simSpeedHoriSlider.value())
 
     def drawScene(self):
@@ -763,10 +764,12 @@ class SimulatorView(QMainWindow):
 
         self.drawTarget(modelSize)
 
+    # To save robot positions from each iteration in a list
     def savePositions(self):
-        pos = [robot.position.copy() for robot in self.robots]
-        self.posList.append(pos)
+        robotPos = [robot.position.copy() for robot in self.robots]
+        self.posList.append(robotPos)
 
+    # To display position of robots according to previous simulation
     def displayPosition(self):
         self.scene.clear()
         self.simulationGraphicsView.viewport().update()
@@ -785,56 +788,65 @@ class SimulatorView(QMainWindow):
 
         self.drawTarget(modelSize)
 
+    # To sync iterationSlider with iterationSpinBox_2
     def adjustIterationSlider(self):
         self.iterationSlider.setSliderPosition(self.iterationSpinBox_2.value())
 
+    # To stop running simulation, remove all items from canvas, and close plots
     def resetScene(self):
+        # Stop timer and disconnect function
+        self.timer.stop()
+        self.timer.timeout.disconnect(self.updateSimFunction)
+
+        # Adjust buttons and values
+        self.swarmDesignGroupBox.setDisabled(False)
+        self.parametersGroupBox.setDisabled(False)
+        self.simSpeedHoriSlider.setDisabled(False)
+        self.startSimPushButton.setDisabled(False)
+        self.iterationSpinBox_2.setDisabled(False)
+        self.resetPushButton.setDisabled(True)
+        self.iterationSlider.setDisabled(True)
+        self.iterationSpinBox_2.setDisabled(True)
         self.finalIterationLabel.setText("-")
         self.iterationSpinBox_2.setValue(0)
+
+        # Remove all scene items
         self.scene.clear()
         self.simulationGraphicsView.update()
         self.simulationGraphicsView.viewport().update()
-        self.iterationSlider.setDisabled(True)
-        self.iterationSpinBox_2.setDisabled(True)
 
+        # Close plots
         plt.close()
 
-        """ Incomplete - implement stop running simulation """
-        # self.startSimPushButton.setDisabled(False)
-
+    # To adjust buttons and scene before simulation starts
     def adjustButtonBeforeSim(self):
         self.scene.clear()
 
         self.swarmDesignGroupBox.setDisabled(True)
         self.parametersGroupBox.setDisabled(True)
-
         self.startSimPushButton.setDisabled(True)
-        self.finalIterationLabel.setText("-")
-        self.iterationSpinBox_2.setValue(0)
         self.simSpeedHoriSlider.setDisabled(True)
-
         self.iterationSlider.setDisabled(True)
         self.iterationSpinBox_2.setDisabled(True)
+        self.resetPushButton.setDisabled(False)
+        self.finalIterationLabel.setText("-")
+        self.iterationSpinBox_2.setValue(0)
 
+    # To adjust buttons and scene after simulation ends
     def adjustButtonAfterSim(self):
-        self.timer.stop()
-
         self.swarmDesignGroupBox.setDisabled(False)
         self.parametersGroupBox.setDisabled(False)
-
         self.simSpeedHoriSlider.setDisabled(False)
-
         self.iterationSlider.setDisabled(False)
         self.iterationSpinBox_2.setDisabled(False)
-
+        self.iterationSlider.setDisabled(False)
+        self.iterationSpinBox_2.setDisabled(False)
         self.startSimPushButton.setDisabled(False)
-        self.finalIterationLabel.setText(str(self.currentIteration))
         self.iterationSlider.setMaximum(self.currentIteration)
         self.iterationSpinBox_2.setMaximum(self.currentIteration)
+        self.finalIterationLabel.setText(str(self.currentIteration))
         self.iterationSlider.setValue(self.currentIteration)
         self.iterationSpinBox_2.setValue(self.currentIteration)
-        self.iterationSlider.setDisabled(False)
-        self.iterationSpinBox_2.setDisabled(False)
 
     # To plot graphs
     def plotGraphs(self):
@@ -848,7 +860,7 @@ class SimulatorView(QMainWindow):
         plt.grid(linestyle='dotted')
         plt.show()
 
-    # To display current iteration
+    # To display current iteration on scene
     def displayCurrentIteration(self):
         iterationText = self.scene.addText("Iteration: %s" % str(self.currentIteration))
         font = QFont()
@@ -856,20 +868,21 @@ class SimulatorView(QMainWindow):
         iterationText.setFont(font)
         iterationText.setPos(0, 0)
 
+    # To display current iteration for iterationSlider on scene
     def displayCurrentIterationSlider(self):
-        iterationText = self.scene.addText("Iteration: %s" % str(self.iterationSlider.value()))
+        iterationTextSlider = self.scene.addText("Iteration: %s" % str(self.iterationSlider.value()))
         font = QFont()
         font.setPointSize(20)
-        iterationText.setFont(font)
-        iterationText.setPos(0, 0)
+        iterationTextSlider.setFont(font)
+        iterationTextSlider.setPos(0, 0)
 
-    # To draw robot as a blue circle
+    # To draw a blue circle representing robot
     def drawRobot(self, size, x, y):
         robotBrush = QBrush(QColor(Qt.blue))
 
         self.scene.addEllipse(x - size / 2, y - size / 2, size, size, brush=robotBrush)
 
-    # To draw target as a red circle
+    # To draw a red circle representing target
     def drawTarget(self, size):
         targetBrush = QBrush(Qt.red)
         self.scene.addEllipse(self.target[0] - size / 2, self.target[1] - size / 2, size, size, brush=targetBrush)
@@ -893,6 +906,7 @@ class SimulatorView(QMainWindow):
 
         return parameterWeightList
 
+    # To save all parameter values in a JSON file to parameters folder
     def saveParameters(self):
         # Prompt user in dialog if they want to save the parameters
         saveParameterDialog = QMessageBox()
@@ -922,21 +936,21 @@ class SimulatorView(QMainWindow):
             with open(toPath, 'w') as file:
                 json.dump(parameters, file)
 
+    # To load parameters from JSON file into simulator
     def loadParameters(self):
         fromPath, ftype = QFileDialog.getOpenFileName(None, "Select a parameter file", "./parameters/", "JSON Files (*.json)")
 
         # Check if user cancelled loading parameters
         if fromPath != '':
-            # Load parameter file
+            # Load JSON parameter file
             with open(fromPath, 'r') as file:
                 jsonParameters = json.load(file)
 
-            # ====================================================================can still implement matching or implement apply algorithm ======================================================================================================"""
-            # If matching with algorithm, apply parameters to simulator
+            # Set parameter values
             self.agentNumberSpinBox.setValue(jsonParameters[0])
             self.iterationSpinBox.setValue(jsonParameters[1])
 
-            # Starting from 2 because index 0 and 1 are taken by number of agents and iterations
+            # Set dynamic parameter values
             counter = 2
             fname = self.selectedAlgoLabel.text().split('.')[0]
             robotString = "%s(None,None)" % fname
