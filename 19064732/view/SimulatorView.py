@@ -66,7 +66,7 @@ class SimulatorView(QMainWindow):
 
         """------------parametersGroupBox------------"""
         self.parametersGroupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
-        self.parametersGroupBox.setGeometry(QtCore.QRect(0, 170, 331, 151))
+        self.parametersGroupBox.setGeometry(QtCore.QRect(0, 170, 331, 201))
         self.parametersGroupBox.setMinimumSize(QtCore.QSize(331, 131))
         self.parametersGroupBox.setAutoFillBackground(True)
         self.parametersGroupBox.setObjectName("parametersGroupBox")
@@ -109,37 +109,9 @@ class SimulatorView(QMainWindow):
         # Instantiate previous algo as None
         self.prevAlgo = None
 
-        """------------mapGroupBox------------"""
-        self.mapGroupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
-        self.mapGroupBox.setGeometry(QtCore.QRect(0, 320, 331, 111))
-        self.mapGroupBox.setMinimumSize(QtCore.QSize(331, 111))
-        self.mapGroupBox.setAutoFillBackground(True)
-        self.mapGroupBox.setObjectName("mapGroupBox")
-        self.layoutWidget_12 = QtWidgets.QWidget(self.mapGroupBox)
-        self.layoutWidget_12.setGeometry(QtCore.QRect(10, 30, 94, 66))
-        self.layoutWidget_12.setObjectName("layoutWidget_12")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.layoutWidget_12)
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout()
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.mapLabel = QtWidgets.QLabel(self.layoutWidget_12)
-        self.mapLabel.setObjectName("mapLabel")
-        self.verticalLayout_3.addWidget(self.mapLabel)
-        self.mapComboBox = QtWidgets.QComboBox(self.layoutWidget_12)
-        self.mapComboBox.setObjectName("mapComboBox")
-        self.mapComboBox.addItem("")
-        self.mapComboBox.addItem("")
-        self.mapComboBox.addItem("")
-        self.verticalLayout_3.addWidget(self.mapComboBox)
-        self.verticalLayout_2.addLayout(self.verticalLayout_3)
-        self.itemCheckBox = QtWidgets.QCheckBox(self.layoutWidget_12)
-        self.itemCheckBox.setObjectName("itemCheckBox")
-        self.verticalLayout_2.addWidget(self.itemCheckBox)
-
         """------------simulationGroupBox------------"""
         self.simulationGroupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
-        self.simulationGroupBox.setGeometry(QtCore.QRect(0, 450, 331, 371))
+        self.simulationGroupBox.setGeometry(QtCore.QRect(0, 380, 331, 111))
         self.simulationGroupBox.setMinimumSize(QtCore.QSize(331, 371))
         self.simulationGroupBox.setAutoFillBackground(True)
         self.simulationGroupBox.setObjectName("simulationGroupBox")
@@ -260,12 +232,9 @@ class SimulatorView(QMainWindow):
         self.taskLabel = QtWidgets.QLabel(self.layoutWidget_15)
         self.taskLabel.setObjectName("taskLabel")
         self.verticalLayout_5.addWidget(self.taskLabel)
-        self.taskComboBox = QtWidgets.QComboBox(self.layoutWidget_15)
-        self.taskComboBox.setObjectName("taskComboBox")
-        self.taskComboBox.addItem("")
-        self.taskComboBox.addItem("")
-        self.taskComboBox.addItem("")
-        self.verticalLayout_5.addWidget(self.taskComboBox)
+        self.taskLabel2 = QtWidgets.QLabel(self.layoutWidget_15)
+        self.taskLabel2.setObjectName("taskLabel")
+        self.verticalLayout_5.addWidget(self.taskLabel2)
         self.algorithmLabel = QtWidgets.QLabel(self.swarmDesignGroupBox)
         self.algorithmLabel.setGeometry(QtCore.QRect(150, 31, 55, 20))
         self.algorithmLabel.setMinimumSize(QtCore.QSize(100, 20))
@@ -320,12 +289,6 @@ class SimulatorView(QMainWindow):
         self.parametersGroupBox.setTitle(_translate("mainWindow", "Parameters"))
         self.agentNumberLabel.setText(_translate("mainWindow", "Number of agents:"))
         self.iterationLabel.setText(_translate("mainWindow", "Iterations:"))
-        self.mapGroupBox.setTitle(_translate("mainWindow", "Map Design"))
-        self.mapLabel.setText(_translate("mainWindow", "Map:"))
-        self.mapComboBox.setItemText(0, _translate("mainWindow", "Map Design 1"))
-        self.mapComboBox.setItemText(1, _translate("mainWindow", "Map Design 2"))
-        self.mapComboBox.setItemText(2, _translate("mainWindow", "Map Design 3"))
-        self.itemCheckBox.setText(_translate("mainWindow", "Items"))
         self.simulationGroupBox.setTitle(_translate("mainWindow", "Simulation"))
         self.simSpeedLabel.setText(_translate("mainWindow", "Simulation speed:"))
         self.videoRecLabel.setText(_translate("mainWindow", "Video recording:"))
@@ -345,9 +308,7 @@ class SimulatorView(QMainWindow):
         self.dropAlgoLabel.setText(_translate("mainWindow", " Drop .py here"))
         self.dropAlgoLabel.setAlignment(Qt.AlignCenter)
         self.taskLabel.setText(_translate("mainWindow", "Task:"))
-        self.taskComboBox.setItemText(0, _translate("mainWindow", "Aggregation"))
-        self.taskComboBox.setItemText(1, _translate("mainWindow", "Exploration"))
-        self.taskComboBox.setItemText(2, _translate("mainWindow", "Foraging"))
+        self.taskLabel2.setText(_translate("mainWindow", "Exploration"))
         self.algorithmLabel.setText(_translate("mainWindow", "Selected Algorithm:"))
         self.selectedAlgoLabel.setText(_translate("mainWindow", "Please select an algorithm."))
         self.algorithmToolButton.setText(_translate("mainWindow", "..."))
@@ -355,6 +316,10 @@ class SimulatorView(QMainWindow):
     """------------Button Event Functions------------"""
     """User-defined functions - Particle"""
     def startSimulation_Particle(self):
+        # Set values
+        targetLocation = [300, 300]
+        fitnessThreshold = 0.005
+
         self.applyParameter()
 
         self.currentIteration = 0
@@ -362,13 +327,14 @@ class SimulatorView(QMainWindow):
         self.fitnessList = []
         self.posList = []
 
-        self.target = [300, 300]        # Set target location
-        self.fitnessThreshold = 0.005   # Set fitness threshold
+        self.target = targetLocation
+        self.fitnessThreshold = fitnessThreshold
 
         for _ in range(self.numRobots):
-            # Set range of values for robot movement
+            # Set range of random values for robot movement
             x = random.randint(0, 600)
             y = random.randint(0, 600)
+
             fname = self.selectedAlgoLabel.text().split('.')[0]
             robotString = "%s(x, y)" % fname
             robot = eval(robotString)
@@ -378,7 +344,7 @@ class SimulatorView(QMainWindow):
         self.startSimTimer()
 
     def updateRobots_Particle(self):
-        globalBestFitness = float('inf')
+        self.globalBestFitness = float('inf')
         globalBestPosition = None
 
         self.parameterWeightList = self.getDynamicParameterValues()
@@ -388,8 +354,8 @@ class SimulatorView(QMainWindow):
             fitness = robot.evaluateFitness(self.target)
             robot.updateBestPosition(fitness)
 
-            if fitness < globalBestFitness:
-                globalBestFitness = fitness
+            if fitness < self.globalBestFitness:
+                self.globalBestFitness = fitness
                 globalBestPosition = robot.position.copy()
 
             robot.updatePosition(globalBestPosition, inertiaWeight=self.parameterWeightList[0], cognitiveWeight=self.parameterWeightList[1], socialWeight=self.parameterWeightList[2])
@@ -397,14 +363,10 @@ class SimulatorView(QMainWindow):
 
         self.savePositions()
         self.drawScene()
-        self.fitnessList.append(globalBestFitness)
+        self.fitnessList.append(self.globalBestFitness)
 
         # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
-        if globalBestFitness < self.fitnessThreshold or self.currentIteration >= self.numIterations:
-            self.timer.stop()
-            self.saveParameters()
-            self.adjustButtonAfterSim()
-            self.plotGraphs()
+        self.terminationCriteriaLowerFitnessIsBetter(True)
 
         self.displayCurrentIteration()
         self.currentIteration += 1
@@ -412,6 +374,10 @@ class SimulatorView(QMainWindow):
 
     """User-defined functions - Firefly"""
     def startSimulation_Firefly(self):
+        # Set values
+        targetLocation = [300, 300]
+        fitnessThreshold = 0.5
+
         self.applyParameter()
 
         self.currentIteration = 0
@@ -419,13 +385,14 @@ class SimulatorView(QMainWindow):
         self.fitnessList = []
         self.posList = []
 
-        self.target = [300, 300]        # Set target location
-        self.fitnessThreshold = 0.2     # Set fitness threshold
+        self.target = targetLocation
+        self.fitnessThreshold = fitnessThreshold
 
         for _ in range(self.numRobots):
-            # Set range of values for robot movement
+            # Set range of random values for robot movement
             x = random.uniform(-10, 10)
             y = random.uniform(-10, 10)
+
             fname = self.selectedAlgoLabel.text().split('.')[0]
             robotString = "%s(x, y)" % fname
             robot = eval(robotString)
@@ -435,16 +402,17 @@ class SimulatorView(QMainWindow):
         self.startSimTimer()
 
     def updateRobots_Firefly(self):
-        globalBestFitness = 0
+        self.globalBestFitness = 0
 
         self.parameterWeightList = self.getDynamicParameterValues()
 
         # Update robot positions
         for robot in self.robots:
-            robot.evaluateFitness(self.target)
+            fitness = robot.evaluateFitness(self.target)
+            robot.fitness = fitness
 
-            if robot.fitness > globalBestFitness:
-                globalBestFitness = robot.fitness
+            if robot.fitness > self.globalBestFitness:
+                self.globalBestFitness = robot.fitness
 
         # Update robot positions
         for robot in self.robots:
@@ -455,14 +423,9 @@ class SimulatorView(QMainWindow):
 
         self.savePositions()
         self.drawScene()
-        self.fitnessList.append(globalBestFitness)
+        self.fitnessList.append(self.globalBestFitness)
 
-        # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
-        if globalBestFitness > self.fitnessThreshold or self.currentIteration >= self.numIterations:
-            self.timer.stop()
-            self.saveParameters()
-            self.adjustButtonAfterSim()
-            self.plotGraphs()
+        self.terminationCriteriaLowerFitnessIsBetter(False)
 
         self.displayCurrentIteration()
         self.currentIteration += 1
@@ -927,3 +890,19 @@ class SimulatorView(QMainWindow):
         # Open file explorer according to path
         if path != "":
             os.startfile(path)
+
+    def terminationCriteriaLowerFitnessIsBetter(self, status: bool):
+        if status:
+            # Stop if fitness is low or max iterations is reached
+            if self.globalBestFitness < self.fitnessThreshold or self.currentIteration >= self.numIterations:
+                self.timer.stop()
+                self.saveParameters()
+                self.adjustButtonAfterSim()
+                self.plotGraphs()
+        else:
+            # Stop if fitness is high or max iterations is reached
+            if self.globalBestFitness > self.fitnessThreshold or self.currentIteration >= self.numIterations:
+                self.timer.stop()
+                self.saveParameters()
+                self.adjustButtonAfterSim()
+                self.plotGraphs()

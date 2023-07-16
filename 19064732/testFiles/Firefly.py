@@ -21,4 +21,5 @@ class Firefly:
         self.position[1] = self.position[1] + attractivenessFactor * (otherFirefly.position[1] - self.position[1]) + randomStep
 
     def evaluateFitness(self, target):
-        self.fitness = 1 / (1 + (math.sqrt((self.position[0] - target[0])**2 + (self.position[1] - target[1])**2)))
+        fitness = 1 / (1 + (math.sqrt((self.position[0] - target[0])**2 + (self.position[1] - target[1])**2)))
+        return fitness
