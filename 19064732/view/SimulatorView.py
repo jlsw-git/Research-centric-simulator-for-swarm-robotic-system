@@ -1,6 +1,6 @@
 """Reserve line 3 for program to write import statement, by default set as pass"""
 try:
-    from model.Particle import Particle
+    pass
 except ModuleNotFoundError:
     pass
 """"""
@@ -468,12 +468,8 @@ class SimulatorView(QMainWindow):
             if not (os.path.exists(to_path)):
                 # If file type is .py, add to model folder
                 if ext == 'py':
-                    # Check if file name already exists
-                    if os.path.exists(to_path):
-                        self.selectedAlgoLabel.setText("Error! File already exists.")
-
                     # Check if file is empty
-                    elif os.path.getsize(path) == 0:
+                    if os.path.getsize(path) == 0:
                         self.selectedAlgoLabel.setText("Error! File is empty.")
 
                     # Copy file to folder
@@ -515,54 +511,8 @@ class SimulatorView(QMainWindow):
                 self.startSimPushButton.setDisabled(False)
                 self.loadPushButton.setDisabled(False)
 
-                # If algorithm is already selected, return
-                if fname == self.prevAlgo:
-                    return
-
-                # Set prev algo name to current filename (default is None)
-                self.prevAlgo = fname
-                self.selectedAlgoLabel.setText(fname)
-
-                # Update parameter ui dynamically
-                fname = self.selectedAlgoLabel.text().split('.')[0]
-                robotString = "%s(None, None)" %fname
-                robot = eval(robotString)
-
-                # Add parameters from row 3 of parameter group box, increment row for each parameter
-                row = 3
-                for parameter in robot.parameters:
-                    # Create horizontal layout
-                    hLayout = QtWidgets.QHBoxLayout()
-                    setattr(self, "horizontalLayout_%s" % parameter, hLayout)
-
-                    # Create parameter label according to paraneter name
-                    parameterLabel = QtWidgets.QLabel(self.parametersGroupBox)
-                    setattr(self, "label_%s" % parameter, parameterLabel)
-
-
-                    # Create double spin box for each parameter label
-                    parameterDoubleSpinBox = QtWidgets.QDoubleSpinBox(self.parametersGroupBox)
-                    setattr(self, "doubleSpinBox_%s" % parameter, parameterDoubleSpinBox)
-
-                    # Adjust default properties of spin boxes
-                    parameterDoubleSpinBox.setMinimum(0.01)
-                    parameterDoubleSpinBox.setMaximum(1.50)
-                    parameterDoubleSpinBox.setSingleStep(0.10)
-                    parameterDoubleSpinBox.setValue(0.80)
-
-                    # Add components to layout
-                    hLayout.addWidget(parameterLabel)
-                    hLayout.addWidget(parameterDoubleSpinBox)
-
-                    # Add components to respective row
-                    self.formLayout_2.setLayout(row, QtWidgets.QFormLayout.LabelRole, hLayout)
-
-                    # Translate label text for main window
-                    _translate = QtCore.QCoreApplication.translate
-                    parameterLabel.setText(_translate("mainWindow", "%s:" % parameter))
-
-                    # Increment row for next parameter
-                    row += 1
+                # Load dynamic parameters
+                self.loadDynamicParameters(fname)
 
     # To get path of dragged algorithm files
     def dragEnterEvent(self, event):
@@ -681,6 +631,7 @@ class SimulatorView(QMainWindow):
         self.iterationSpinBox_2.setDisabled(True)
         self.pauseSimPushButton.setDisabled(True)
         self.resumeSimPushButton.setDisabled(True)
+        self.loadPushButton.setDisabled(False)
         self.finalIterationLabel.setText("-")
         self.iterationSpinBox_2.setValue(0)
 
@@ -703,6 +654,7 @@ class SimulatorView(QMainWindow):
         self.simSpeedHoriSlider.setDisabled(True)
         self.iterationSlider.setDisabled(True)
         self.iterationSpinBox_2.setDisabled(True)
+        self.loadPushButton.setDisabled(True)
         self.resetPushButton.setDisabled(False)
         self.finalIterationLabel.setText("-")
         self.iterationSpinBox_2.setValue(0)
@@ -717,6 +669,7 @@ class SimulatorView(QMainWindow):
         self.iterationSlider.setDisabled(False)
         self.iterationSpinBox_2.setDisabled(False)
         self.startSimPushButton.setDisabled(False)
+        self.loadPushButton.setDisabled(False)
         self.iterationSlider.setMaximum(self.currentIteration)
         self.iterationSpinBox_2.setMaximum(self.currentIteration)
         self.finalIterationLabel.setText(str(self.currentIteration))
@@ -912,6 +865,7 @@ class SimulatorView(QMainWindow):
         if path != "":
             os.startfile(path)
 
+    # To check if fitness is better when lower or higher for the algorithm
     def terminationCriteriaLowerFitnessIsBetter(self, status: bool):
         if status:
             # Stop if fitness is low or max iterations is reached
@@ -928,14 +882,89 @@ class SimulatorView(QMainWindow):
                 self.adjustButtonAfterSim()
                 self.plotGraphs()
 
+    # To pause simulation
     def pauseSimulation(self):
         self.pauseSimPushButton.setDisabled(True)
         self.resumeSimPushButton.setDisabled(False)
 
         self.timer.stop()
 
+    # To resume simulation
     def resumeSimulation(self):
         self.pauseSimPushButton.setDisabled(False)
         self.resumeSimPushButton.setDisabled(True)
 
         self.timer.start()
+
+    # To load dynamic parameters on startup if import already exists
+    def checkImport(self):
+        # Read each line of the file
+        with open('./view/SimulatorView.py', 'r') as file:
+            lines = file.readlines()
+
+        # If import statement does not exist, write import statement to file and restart program
+        try:
+            if "import" in lines[2]:
+                importStatement = lines[2]
+                algoName = importStatement.split(' ')[-1].strip()
+                fname = f"{algoName}.py"
+
+                # Adjust buttons
+                self.startSimPushButton.setDisabled(False)
+                self.loadPushButton.setDisabled(False)
+
+                # Load dynamic parameters
+                self.loadDynamicParameters(fname)
+
+        except NameError:
+            self.selectedAlgoLabel.setText("Unknown import found.")
+
+    # To load dynamic parameters
+    def loadDynamicParameters(self, fname):
+        # If algorithm is already selected, return
+        if fname == self.prevAlgo:
+            return
+
+        # Set prev algo name to current filename (default is None)
+        self.prevAlgo = fname
+        self.selectedAlgoLabel.setText(fname)
+
+        # Update parameter ui dynamically
+        fname = self.selectedAlgoLabel.text().split('.')[0]
+        robotString = "%s(None, None)" % fname
+        robot = eval(robotString)
+
+        # Add parameters from row 3 of parameter group box, increment row for each parameter
+        row = 3
+        for parameter in robot.parameters:
+            # Create horizontal layout
+            hLayout = QtWidgets.QHBoxLayout()
+            setattr(self, "horizontalLayout_%s" % parameter, hLayout)
+
+            # Create parameter label according to paraneter name
+            parameterLabel = QtWidgets.QLabel(self.parametersGroupBox)
+            setattr(self, "label_%s" % parameter, parameterLabel)
+
+            # Create double spin box for each parameter label
+            parameterDoubleSpinBox = QtWidgets.QDoubleSpinBox(self.parametersGroupBox)
+            setattr(self, "doubleSpinBox_%s" % parameter, parameterDoubleSpinBox)
+
+            # Adjust default properties of spin boxes
+            parameterDoubleSpinBox.setMinimum(0.01)
+            parameterDoubleSpinBox.setMaximum(1000)
+            parameterDoubleSpinBox.setSingleStep(0.10)
+            parameterDoubleSpinBox.setValue(0.80)
+
+            # Add components to layout
+            hLayout.addWidget(parameterLabel)
+            hLayout.addWidget(parameterDoubleSpinBox)
+
+            # Add components to respective row
+            self.formLayout_2.setLayout(row, QtWidgets.QFormLayout.LabelRole, hLayout)
+
+            # Translate label text for main window
+            _translate = QtCore.QCoreApplication.translate
+            parameterLabel.setText(_translate("mainWindow", "%s:" % parameter))
+
+            # Increment row for next parameter
+            row += 1

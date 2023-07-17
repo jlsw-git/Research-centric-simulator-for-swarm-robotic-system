@@ -10,6 +10,7 @@ def main():
     mainWindow = SimulatorView()
     mainWindow.setupUi(mainWindow)
     mainWindow.show()
+    mainWindow.checkImport()
     sys.exit(app.exec_())
 
 
