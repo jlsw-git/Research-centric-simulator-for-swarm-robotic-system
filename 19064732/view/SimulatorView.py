@@ -18,7 +18,7 @@ from datetime import date
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QBrush, QColor, QFont
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QMainWindow, QGraphicsScene, QGraphicsView, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QMainWindow, QGraphicsScene, QGraphicsView, QMessageBox, QLayout
 
 
 class SimulatorView(QMainWindow):
@@ -140,6 +140,7 @@ class SimulatorView(QMainWindow):
         self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.layoutWidget_13)
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.verticalLayout_4.setSizeConstraint(QLayout.SetFixedSize)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         self.startPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
@@ -159,39 +160,37 @@ class SimulatorView(QMainWindow):
         self.verticalLayout_4.addWidget(self.horizontalLine)
         self.startSimPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
         self.startSimPushButton.setObjectName("startSimPushButton")
+        self.startSimPushButton.setStyleSheet("font-weight: bold;")
         self.verticalLayout_4.addWidget(self.startSimPushButton)
-        self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
         self.pauseSimPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
         self.pauseSimPushButton.setObjectName("pauseSimPushButton")
-        self.horizontalLayout_6.addWidget(self.pauseSimPushButton)
+        self.horizontalLayout_5.addWidget(self.pauseSimPushButton)
         self.resumeSimPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
         self.resumeSimPushButton.setObjectName("resumeSimPushButton")
-        self.horizontalLayout_6.addWidget(self.resumeSimPushButton)
-        self.verticalLayout_4.addLayout(self.horizontalLayout_6)
-        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.loadPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
-        self.loadPushButton.setObjectName("loadPushButton")
-        self.horizontalLayout_5.addWidget(self.loadPushButton)
+        self.horizontalLayout_5.addWidget(self.resumeSimPushButton)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_5)
         self.resetPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
         self.resetPushButton.setObjectName("resetPushButton")
-        self.horizontalLayout_5.addWidget(self.resetPushButton)
-        self.verticalLayout_4.addLayout(self.horizontalLayout_5)
+        self.verticalLayout_4.addWidget(self.resetPushButton)
+        self.loadPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
+        self.loadPushButton.setObjectName("loadPushButton")
+        self.verticalLayout_4.addWidget(self.loadPushButton)
         self.currentIterationLabel = QtWidgets.QLabel(self.simulationGroupBox)
-        self.currentIterationLabel.setGeometry(QtCore.QRect(10, 260, 80, 13))
+        self.currentIterationLabel.setGeometry(QtCore.QRect(10, 320, 80, 13))
         self.currentIterationLabel.setObjectName("currentIterationLabel")
         self.iterationSlider = QtWidgets.QSlider(self.simulationGroupBox)
-        self.iterationSlider.setGeometry(QtCore.QRect(80, 280, 160, 22))
+        self.iterationSlider.setGeometry(QtCore.QRect(80, 340, 160, 22))
         self.iterationSlider.setOrientation(QtCore.Qt.Horizontal)
         self.iterationSlider.setObjectName("iterationSlider")
         self.firstIterationLabel = QtWidgets.QLabel(self.simulationGroupBox)
-        self.firstIterationLabel.setGeometry(QtCore.QRect(80, 300, 21, 20))
+        self.firstIterationLabel.setGeometry(QtCore.QRect(80, 360, 21, 20))
         self.firstIterationLabel.setObjectName("firstIterationLabel")
         self.finalIterationLabel = QtWidgets.QLabel(self.simulationGroupBox)
-        self.finalIterationLabel.setGeometry(QtCore.QRect(230, 300, 81, 20))
+        self.finalIterationLabel.setGeometry(QtCore.QRect(230, 360, 81, 20))
         self.finalIterationLabel.setObjectName("finalIterationLabel")
         self.iterationSpinBox_2 = QtWidgets.QSpinBox(self.simulationGroupBox)
-        self.iterationSpinBox_2.setGeometry(QtCore.QRect(260, 280, 42, 22))
+        self.iterationSpinBox_2.setGeometry(QtCore.QRect(260, 340, 42, 22))
         self.iterationSpinBox_2.setObjectName("iterationSpinBox_2")
 
         # Adjust simSpeedHoriSlider properties
@@ -317,7 +316,7 @@ class SimulatorView(QMainWindow):
         self.startSimPushButton.setText(_translate("mainWindow", "Start Simulation"))
         self.pauseSimPushButton.setText(_translate("mainWindow", "Pause"))
         self.resumeSimPushButton.setText(_translate("mainWindow", "Resume"))
-        self.loadPushButton.setText(_translate("mainWindow", "Load"))
+        self.loadPushButton.setText(_translate("mainWindow", "Load Parameters"))
         self.resetPushButton.setText(_translate("mainWindow", "Reset"))
         self.currentIterationLabel.setText(_translate("mainWindow", "Load Iteration:"))
         self.firstIterationLabel.setText(_translate("mainWindow", "0"))
@@ -330,6 +329,7 @@ class SimulatorView(QMainWindow):
         self.algorithmLabel.setText(_translate("mainWindow", "Selected Algorithm:"))
         self.selectedAlgoLabel.setText(_translate("mainWindow", "Please select an algorithm."))
         self.algorithmToolButton.setText(_translate("mainWindow", "..."))
+
 
     """------------Button Event Functions------------"""
     """User-defined functions - Particle"""
@@ -679,6 +679,8 @@ class SimulatorView(QMainWindow):
         self.resetPushButton.setDisabled(True)
         self.iterationSlider.setDisabled(True)
         self.iterationSpinBox_2.setDisabled(True)
+        self.pauseSimPushButton.setDisabled(True)
+        self.resumeSimPushButton.setDisabled(True)
         self.finalIterationLabel.setText("-")
         self.iterationSpinBox_2.setValue(0)
 
@@ -927,7 +929,6 @@ class SimulatorView(QMainWindow):
                 self.plotGraphs()
 
     def pauseSimulation(self):
-        self.startSimPushButton.setDisabled(False)
         self.pauseSimPushButton.setDisabled(True)
         self.resumeSimPushButton.setDisabled(False)
 
