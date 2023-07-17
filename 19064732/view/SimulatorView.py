@@ -1,6 +1,6 @@
 """Reserve line 3 for program to write import statement, by default set as pass"""
 try:
-    pass
+    from model.Particle import Particle
 except ModuleNotFoundError:
     pass
 """"""
@@ -111,8 +111,8 @@ class SimulatorView(QMainWindow):
 
         """------------simulationGroupBox------------"""
         self.simulationGroupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
-        self.simulationGroupBox.setGeometry(QtCore.QRect(0, 380, 331, 111))
-        self.simulationGroupBox.setMinimumSize(QtCore.QSize(331, 371))
+        self.simulationGroupBox.setGeometry(QtCore.QRect(0, 380, 331, 391))
+        self.simulationGroupBox.setMinimumSize(QtCore.QSize(331, 391))
         self.simulationGroupBox.setAutoFillBackground(True)
         self.simulationGroupBox.setObjectName("simulationGroupBox")
         self.simSpeedLabel = QtWidgets.QLabel(self.simulationGroupBox)
@@ -160,6 +160,14 @@ class SimulatorView(QMainWindow):
         self.startSimPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
         self.startSimPushButton.setObjectName("startSimPushButton")
         self.verticalLayout_4.addWidget(self.startSimPushButton)
+        self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
+        self.pauseSimPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
+        self.pauseSimPushButton.setObjectName("pauseSimPushButton")
+        self.horizontalLayout_6.addWidget(self.pauseSimPushButton)
+        self.resumeSimPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
+        self.resumeSimPushButton.setObjectName("resumeSimPushButton")
+        self.horizontalLayout_6.addWidget(self.resumeSimPushButton)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_6)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
         self.loadPushButton = QtWidgets.QPushButton(self.layoutWidget_13)
@@ -204,6 +212,8 @@ class SimulatorView(QMainWindow):
         self.resetPushButton.setDisabled(True)
         self.iterationSlider.setDisabled(True)
         self.startSimPushButton.setDisabled(True)
+        self.pauseSimPushButton.setDisabled(True)
+        self.resumeSimPushButton.setDisabled(True)
         self.loadPushButton.setDisabled(True)
         self.iterationSpinBox_2.setDisabled(True)
 
@@ -268,6 +278,12 @@ class SimulatorView(QMainWindow):
         # startSimPushButton - Start simulation
         self.startSimPushButton.clicked.connect(self.startSimulation)
 
+        # pauseSimPushButton - Pause simulation
+        self.pauseSimPushButton.clicked.connect(self.pauseSimulation)
+
+        # resumePushButton - Resume simulation
+        self.resumeSimPushButton.clicked.connect(self.resumeSimulation)
+
         # algorithmToolButton - Select algorithm from local files
         self.algorithmToolButton.clicked.connect(self.selectAlgorithm)
 
@@ -299,6 +315,8 @@ class SimulatorView(QMainWindow):
         self.stopPushButton.setText(_translate("mainWindow", "Stop Rec"))
         self.viewRecPushButton.setText(_translate("mainWindow", "View Rec"))
         self.startSimPushButton.setText(_translate("mainWindow", "Start Simulation"))
+        self.pauseSimPushButton.setText(_translate("mainWindow", "Pause"))
+        self.resumeSimPushButton.setText(_translate("mainWindow", "Resume"))
         self.loadPushButton.setText(_translate("mainWindow", "Load"))
         self.resetPushButton.setText(_translate("mainWindow", "Reset"))
         self.currentIterationLabel.setText(_translate("mainWindow", "Load Iteration:"))
@@ -679,6 +697,7 @@ class SimulatorView(QMainWindow):
         self.swarmDesignGroupBox.setDisabled(True)
         self.parametersGroupBox.setDisabled(True)
         self.startSimPushButton.setDisabled(True)
+        self.pauseSimPushButton.setDisabled(False)
         self.simSpeedHoriSlider.setDisabled(True)
         self.iterationSlider.setDisabled(True)
         self.iterationSpinBox_2.setDisabled(True)
@@ -906,3 +925,16 @@ class SimulatorView(QMainWindow):
                 self.saveParameters()
                 self.adjustButtonAfterSim()
                 self.plotGraphs()
+
+    def pauseSimulation(self):
+        self.startSimPushButton.setDisabled(False)
+        self.pauseSimPushButton.setDisabled(True)
+        self.resumeSimPushButton.setDisabled(False)
+
+        self.timer.stop()
+
+    def resumeSimulation(self):
+        self.pauseSimPushButton.setDisabled(False)
+        self.resumeSimPushButton.setDisabled(True)
+
+        self.timer.start()
