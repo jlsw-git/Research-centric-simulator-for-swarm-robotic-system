@@ -42,6 +42,8 @@ class SimulatorView(QMainWindow):
         self.simulationGraphicsView.setObjectName("simulationGraphicsView")
         self.simulationGraphicsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.simulationGraphicsView.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.simulationGraphicsView.horizontalScrollBar().blockSignals(True)
+        self.simulationGraphicsView.verticalScrollBar().blockSignals(True)
         self.layoutWidget = QtWidgets.QWidget(self.centralWidget)
         self.layoutWidget.setGeometry(QtCore.QRect(0, 0, 2, 2))
         self.layoutWidget.setObjectName("layoutWidget")
@@ -382,11 +384,11 @@ class SimulatorView(QMainWindow):
         self.savePositions()
         self.drawScene()
         self.fitnessList.append(self.globalBestFitness)
+        self.displayCurrentIteration()
 
         # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
         self.terminationCriteriaLowerFitnessIsBetter(True)
 
-        self.displayCurrentIteration()
         self.currentIteration += 1
     """------------------------"""
 
@@ -442,10 +444,10 @@ class SimulatorView(QMainWindow):
         self.savePositions()
         self.drawScene()
         self.fitnessList.append(self.globalBestFitness)
+        self.displayCurrentIteration()
 
         self.terminationCriteriaLowerFitnessIsBetter(False)
 
-        self.displayCurrentIteration()
         self.currentIteration += 1
     """------------------------"""
 
@@ -754,12 +756,17 @@ class SimulatorView(QMainWindow):
             algoName = self.selectedAlgoLabel.text().split('.')[0]
 
             filename = "%s_parameters_%s.json" % (algoName, counter)
-            toPath = "./parameters/" + filename
+            toFolder = "./parameters/" + algoName
+            toPath = "./parameters/" + algoName + "/" + filename
+
+            # Create folder for the algorithm if it does not exist
+            if not os.path.exists(toPath):
+                os.makedirs(toFolder)
 
             while os.path.exists(toPath):
                 counter += 1
                 filename = "%s_parameters_%s.json" % (algoName, counter)
-                toPath = "./parameters/" + filename
+                toPath = "./parameters/" + algoName + "/" + filename
 
             with open(toPath, 'w') as file:
                 json.dump(parameters, file)
