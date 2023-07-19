@@ -378,7 +378,7 @@ class SimulatorView(QMainWindow):
                 self.globalBestFitness = fitness
                 globalBestPosition = robot.position.copy()
 
-            robot.updatePosition(globalBestPosition, inertiaWeight=self.parameterWeightList[0], cognitiveWeight=self.parameterWeightList[1], socialWeight=self.parameterWeightList[2])
+            robot.updateVelocity(globalBestPosition, inertiaWeight=self.parameterWeightList[0], cognitiveWeight=self.parameterWeightList[1], socialWeight=self.parameterWeightList[2])
             robot.move()
 
         self.savePositions()
@@ -438,7 +438,7 @@ class SimulatorView(QMainWindow):
         for robot in self.robots:
             for otherFirefly in self.robots:
                 if robot.fitness < otherFirefly.fitness:
-                    robot.updatePosition(otherFirefly, attractiveness=self.parameterWeightList[0], stepSize=self.parameterWeightList[1])
+                    robot.updateVelocity(otherFirefly, attractiveness=self.parameterWeightList[0], stepSize=self.parameterWeightList[1])
             robot.move()
 
         self.savePositions()
