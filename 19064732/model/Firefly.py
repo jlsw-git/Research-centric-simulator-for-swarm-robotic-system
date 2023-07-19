@@ -12,7 +12,7 @@ class Firefly:
         self.position[0] += random.uniform(-10, 10)
         self.position[1] += random.uniform(-10, 10)
 
-    def updateVelocity(self, otherFirefly, attractiveness, stepSize):
+    def updatePosition(self, otherFirefly, attractiveness, stepSize):
         distance = math.sqrt((self.position[0] - otherFirefly.position[0])**2 + (self.position[1] - otherFirefly.position[1])**2)
         attractivenessFactor = attractiveness / (1 + distance**2)
         randomStep = random.uniform(-stepSize, stepSize)

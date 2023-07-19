@@ -14,7 +14,7 @@ class Particle:
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
 
-    def updateVelocity(self, globalBestPosition, inertiaWeight, cognitiveWeight, socialWeight):
+    def updatePosition(self, globalBestPosition, inertiaWeight, cognitiveWeight, socialWeight):
         r1 = random.random()
         r2 = random.random()
 
