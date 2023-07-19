@@ -196,7 +196,7 @@ class SimulatorView(QMainWindow):
         self.iterationSpinBox_2.setObjectName("iterationSpinBox_2")
 
         # Adjust simSpeedHoriSlider properties
-        self.simSpeedHoriSlider.setMinimum(10)
+        self.simSpeedHoriSlider.setMinimum(1)
         self.simSpeedHoriSlider.setMaximum(250)
         self.simSpeedHoriSlider.setValue(250)
         self.simSpeedHoriSlider.setInvertedAppearance(True)
