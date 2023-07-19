@@ -1,9 +1,9 @@
 """Reserve line 3 for program to write import statement, by default set as pass"""
 try:
     pass
+
 except ModuleNotFoundError:
     pass
-""""""
 
 import random
 import os
@@ -297,7 +297,7 @@ class SimulatorView(QMainWindow):
         # iterationSpinBox_2 - Sync iteration spinbox to current slider value
         self.iterationSpinBox_2.valueChanged.connect(self.adjustIterationSlider)
 
-        # loadPushButton - Load saved parameters from json file
+        # loadPushButton - Load saved parameters from JSON file
         self.loadPushButton.clicked.connect(self.loadParameters)
 
     def retranslateUi(self, mainWindow):
@@ -331,7 +331,6 @@ class SimulatorView(QMainWindow):
         self.algorithmLabel.setText(_translate("mainWindow", "Selected Algorithm:"))
         self.selectedAlgoLabel.setText(_translate("mainWindow", "Please select an algorithm."))
         self.algorithmToolButton.setText(_translate("mainWindow", "..."))
-
 
     """------------Button Event Functions------------"""
     """User-defined functions - Particle"""
@@ -396,7 +395,7 @@ class SimulatorView(QMainWindow):
     def startSimulation_Firefly(self):
         # Set values
         targetLocation = [300, 300]
-        fitnessThreshold = 0.5
+        fitnessThreshold = 0.35
 
         self.applyParameter()
 
@@ -451,8 +450,72 @@ class SimulatorView(QMainWindow):
         self.currentIteration += 1
     """------------------------"""
 
+    """New Algorithm Format: User-defined functions - algorithmName"""
+    def startSimulation_algorithmName(self):
+        # Set values
+        targetLocation = [300, 300]
+        fitnessThreshold = 0.005
+
+        self.applyParameter()
+
+        self.currentIteration = 0
+        self.robots = []
+        self.fitnessList = []
+        self.posList = []
+
+        self.target = targetLocation
+        self.fitnessThreshold = fitnessThreshold
+
+        for _ in range(self.numRobots):
+            # Set range of random values for robot movement
+            x = random.randint(0, 600)
+            y = random.randint(0, 600)
+
+            fname = self.selectedAlgoLabel.text().split('.')[0]
+            robotString = "%s(x, y)" % fname
+            robot = eval(robotString)
+            self.robots.append(robot)
+
+        self.startSimTimer()
+
+    def updateRobots_algorithmName(self):
+        # Initialize values
+        lowerFitnessIsBetter = True
+        globalBestFitness = 0
+        self.parameterWeightList = self.getDynamicParameterValues()
+
+        # Update robot positions
+        for robot in self.robots:
+            fitness = robot.evaluateFitness(self.target)
+            robot.fitness = fitness
+
+            if robot.fitness > globalBestFitness:
+                globalBestFitness = robot.fitness
+
+        # Update robot positions, adjust conditions and parameters accordingly
+        for robot in self.robots:
+            robot.updatePosition()
+            robot.move()
+
+        self.savePositions()
+        self.drawScene()
+        self.fitnessList.append(globalBestFitness)
+
+        # Check termination criteria - Stop if fitness threshold or max number of iterations is reached
+        self.terminationCriteriaLowerFitnessIsBetter(lowerFitnessIsBetter)
+
+        self.displayCurrentIteration()
+        self.currentIteration += 1
+    """------------------------"""
+
     # To select algorithm from system files
     def selectAlgorithm(self):
+        # Create folder for the algorithm files if it does not exist
+        toFolder = "./model/"
+        if not os.path.exists(toFolder):
+            os.makedirs(toFolder)
+
+        # Get file path with file explorer
         path, ftype = QFileDialog.getOpenFileName(None, "Select a Swarm Algorithm", "./model/", "PY Files (*.py)")
 
         # Check if user cancelled algorithm selection
@@ -527,12 +590,17 @@ class SimulatorView(QMainWindow):
     # To accept path of dragged and dropped algorithm files
     def dropEvent(self, event):
         files = [u.toLocalFile() for u in event.mimeData().urls()]
-        fromPath = files[0]  # C:/Users/user/Desktop/19064732/model/sample.py
-        fname = fromPath.split('/')[-1]  # sample.py
+        fromPath = files[0]  # C:/Users/user/Desktop/sampleFile.py
+        fname = fromPath.split('/')[-1]  # sampleFile.py
         ext = fname.split('.')[-1]  # py
-        toPath = "./model/%s" %fname
+
+        # Create model folder if it does not exist
+        toFolder = "./model/"
+        if not os.path.exists(toFolder):
+            os.makedirs(toFolder)
 
         # If file type is .py, add to model folder
+        toPath = "./model/%s" %fname
         if ext == 'py':
             # Check if file name already exists
             if os.path.exists(toPath):
@@ -672,6 +740,7 @@ class SimulatorView(QMainWindow):
         self.iterationSpinBox_2.setDisabled(False)
         self.startSimPushButton.setDisabled(False)
         self.loadPushButton.setDisabled(False)
+        self.pauseSimPushButton.setDisabled(True)
         self.iterationSlider.setMaximum(self.currentIteration)
         self.iterationSpinBox_2.setMaximum(self.currentIteration)
         self.finalIterationLabel.setText(str(self.currentIteration))
@@ -773,6 +842,12 @@ class SimulatorView(QMainWindow):
 
     # To load parameters from JSON file into simulator
     def loadParameters(self):
+        # Create folder for the algorithm files if it does not exist
+        toFolder = "./parameters/"
+        if not os.path.exists(toFolder):
+            os.makedirs(toFolder)
+
+        # Get parameter file path
         fromPath, ftype = QFileDialog.getOpenFileName(None, "Select a parameter file", "./parameters/", "JSON Files (*.json)")
 
         # Check if user cancelled loading parameters
@@ -806,6 +881,11 @@ class SimulatorView(QMainWindow):
         clean_date = current_date.replace("-", "")
         filename = "VID%s_%s.mp4" % (clean_date, counter)
         filepath = "./recordings/" + filename
+
+        toFolder = "./recordings/"
+        # Create folder for the video recordings if it does not exist
+        if not os.path.exists(filepath):
+            os.makedirs(toFolder)
 
         while os.path.exists(filepath):
             counter += 1
@@ -896,7 +976,7 @@ class SimulatorView(QMainWindow):
 
         self.timer.stop()
 
-    # To resume simulation
+    # To resume simulation after a pause
     def resumeSimulation(self):
         self.pauseSimPushButton.setDisabled(False)
         self.resumeSimPushButton.setDisabled(True)
