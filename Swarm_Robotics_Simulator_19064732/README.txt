@@ -8,7 +8,7 @@ Required Software Installation:
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
     python get-pip.py
 
-    or manually install pip:
+   or manually install pip:
     1. Download and save https://bootstrap.pypa.io/get-pip.py into the same directory as Python
     2. In command prompt, use the cd command and navigate to the directory where Python is installed.
     3. Run the command: python get-pip.py
